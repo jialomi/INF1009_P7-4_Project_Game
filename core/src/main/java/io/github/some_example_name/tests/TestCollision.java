@@ -21,17 +21,18 @@ public class TestCollision extends ApplicationAdapter {
     public void create() {
         shape = new ShapeRenderer();
 
-        circle = new Circle(100, 300, 40, Color.RED);
-        triangle = new Triangle(300, 200, 60, Color.GREEN);
+        // Test objects
+        circle = new Circle(100, 100, 40, Color.RED);
+        triangle = new Triangle(400, 300, 60, Color.GREEN);
 
+        // Initialize collision manager
         collisionManager = new CollisionManager();
+        
+        // Register objects as collidables
         collisionManager.addCollidable(circle);
         collisionManager.addCollidable(triangle);
 
-        System.out.println("=== Collision Test Started ===");
-        System.out.println("Use ARROW keys to move the red circle");
-        System.out.println("Collide with the green triangle");
-        System.out.println("Triangle will disappear on collision");
+        System.out.println("Collision test started. Press ARROWS to move circle. Triangle will turn YELLOW when hit.");
     }
 
     @Override
@@ -40,13 +41,14 @@ public class TestCollision extends ApplicationAdapter {
 
         float delta = Gdx.graphics.getDeltaTime();
 
+        // Update circle position
         circle.update(delta);
 
-        collisionManager.update();
+        // Reset triangle to original color
+        triangle.resetColor();
 
-        if (!triangle.isActive()) {
-            collisionManager.removeCollidable(triangle);
-        }
+        // Check for collisions
+        collisionManager.update();
 
         shape.begin(ShapeRenderer.ShapeType.Filled);
         circle.draw(shape);
@@ -59,12 +61,11 @@ public class TestCollision extends ApplicationAdapter {
         shape.dispose();
     }
 
-    // Inner class: Circle
+    // Movable circle that implements Collidable
     class Circle implements Collidable {
         private float x, y;
         private float radius;
         private Color color;
-        private boolean active = true;
         private float speed = 200f;
         private Rectangle bounds;
 
@@ -92,36 +93,29 @@ public class TestCollision extends ApplicationAdapter {
         }
 
         public void draw(ShapeRenderer shape) {
-            if (active) {
-                shape.setColor(color);
-                shape.circle(x, y, radius);
-            }
+            shape.setColor(color);
+            shape.circle(x, y, radius);
         }
 
+        // Return bounding box for collision detection
         @Override
         public Rectangle getBounds() {
             bounds.setPosition(x - radius, y - radius);
             return bounds;
         }
 
+        // No action needed for circle
         @Override
         public void onCollision(Collidable other) {
-            if (other instanceof Triangle) {
-                System.out.println("Circle hit triangle!");
-            }
-        }
-
-        public boolean isActive() {
-            return active;
         }
     }
 
-    // Inner class: Triangle
+ // Static triangle that implements Collidable
     class Triangle implements Collidable {
         private float x, y;
         private float size;
         private Color color;
-        private boolean active = true;
+        private Color originalColor;
         private Rectangle bounds;
 
         public Triangle(float x, float y, float size, Color color) {
@@ -129,35 +123,33 @@ public class TestCollision extends ApplicationAdapter {
             this.y = y;
             this.size = size;
             this.color = color;
+            this.originalColor = color.cpy();
             this.bounds = new Rectangle(x, y, size, size);
         }
 
         public void draw(ShapeRenderer shape) {
-            if (active) {
-                shape.setColor(color);
-                shape.triangle(
-                        x, y,
-                        x + size, y,
-                        x + size / 2, y + size);
-            }
+            shape.setColor(color);
+            shape.triangle(
+                    x, y,
+                    x + size, y,
+                    x + size / 2, y + size);
         }
 
+        public void resetColor() {
+            color = originalColor;
+        }
+
+        // Return bounding box for collision detection
         @Override
         public Rectangle getBounds() {
             bounds.setPosition(x, y);
             return bounds;
         }
 
+        // Change color when colliding
         @Override
         public void onCollision(Collidable other) {
-            if (other instanceof Circle) {
-                System.out.println("Triangle hit by circle! Triangle disappearing...");
-                active = false;
-            }
-        }
-
-        public boolean isActive() {
-            return active;
+            color = Color.YELLOW;
         }
     }
 }
