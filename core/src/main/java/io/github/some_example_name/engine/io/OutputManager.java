@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-// IMPORT THE ENTITY CLASS (See file #5 below)
 import io.github.some_example_name.engine.entity.Entity;
 
 public class OutputManager implements Disposable {

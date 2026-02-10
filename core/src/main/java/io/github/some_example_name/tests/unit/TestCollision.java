@@ -1,4 +1,4 @@
-package io.github.some_example_name.tests;
+package io.github.some_example_name.tests.unit;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
