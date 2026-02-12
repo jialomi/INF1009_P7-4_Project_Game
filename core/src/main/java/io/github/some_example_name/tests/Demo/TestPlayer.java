@@ -20,7 +20,7 @@ public class TestPlayer extends RenderableEntity implements Collidable {
 
     @Override
     public void update(float deltaTime) {
-        movementManager.handleWASDMovementNormalized(this, 400f, deltaTime);
+        movementManager.handlePlayerMovement(this, 400f, deltaTime);
     }
     
     @Override
