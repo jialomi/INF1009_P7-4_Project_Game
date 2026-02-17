@@ -1,3 +1,0 @@
-crash.mp3
-libgdx.png
-test.mp3
