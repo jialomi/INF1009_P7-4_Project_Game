@@ -18,12 +18,15 @@ public class DynamicInput implements InputProcessor, Disposable {
     private Map<Integer, Boolean> keyState;
     private Map<Integer, Boolean> keyJustPressed;
 
-    private Vector2 mousePosition;
+    // removed
+    // private Vector2 mousePosition;
 
     public void initialize() {
         keyState = new HashMap<>();
         keyJustPressed = new HashMap<>();
-        mousePosition = new Vector2();
+
+        // removed
+        // mousePosition = new Vector2();
     }
 
     /**
@@ -47,7 +50,13 @@ public class DynamicInput implements InputProcessor, Disposable {
     }
 
     public Vector2 getMousePosition() {
-        return mousePosition;
+        // returning mousePosition directly might introduce a bug
+        // where the mousePosition returned is not converted
+        // from actual pixels to in game world pixels
+        // return mousePosition;
+
+        // fetch real position from engine, not raw pixel
+        return IOManager.getInstance().getOutputManager().getMouseInGameWorld();
     }
 
     // libgdx hardware callbacks (os calls these)
@@ -68,14 +77,18 @@ public class DynamicInput implements InputProcessor, Disposable {
 
     @Override
     public boolean touchDown(int x, int y, int p, int b) {
-        mousePosition.set(x, y); // update mouse coordinates on click
+        // dont need to store x & y anymore
+        // because getMousePosition() asks Gdx.input directly
+        // mousePosition.set(x, y); // update mouse coordinates on click
         return true;
     }
 
     // track movement even if not clicking
     @Override
     public boolean mouseMoved(int x, int y) {
-        mousePosition.set(x, y);
+        // dont need to store x & y anymore
+        // because getMousePosition() asks Gdx.input directly
+        // mousePosition.set(x, y);
         return true;
     }
 

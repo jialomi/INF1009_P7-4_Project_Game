@@ -9,6 +9,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.some_example_name.engine.entity.Entity;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+
 // /**
 //  * OutputManager - handles all visuals
 //  * hides the complex OpenGL calls (glClearing, Matrices)
@@ -54,6 +57,24 @@ public class OutputManager implements Disposable {
         if (viewport != null) {
             viewport.update(width, height, true);
         }
+    }
+
+    /**
+     * converts screen coordinates (mouse) to world coordinates (game)
+     * important as window size might be different from game size
+     */
+    public Vector2 getMouseInGameWorld() {
+        // get raw mouse position from input
+        float screenX = Gdx.input.getX();
+        float screenY = Gdx.input.getY();
+
+        // ask camera to translate to world units
+        // vector3 is required by unproject method
+        Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0),
+                viewport.getScreenX(), viewport.getScreenY(),
+                viewport.getScreenWidth(), viewport.getScreenHeight());
+
+        return new Vector2(worldPos.x, worldPos.y);
     }
 
     /**
