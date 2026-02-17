@@ -1,6 +1,5 @@
 package io.github.some_example_name.tests.Demo;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -34,7 +33,7 @@ public class TestPauseScene extends AbstractScene {
     @Override
     protected void onUpdate(float delta) {
         // go back to main game on "p"
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.P)) {
             // switch back to "main" (formerly game/demo)
             SceneManager.getInstance().setActive("main");
         }
@@ -48,8 +47,8 @@ public class TestPauseScene extends AbstractScene {
         output.beginFrame();
 
         // 2. define center of the virtual world
-        float centerX = 400; // 800 / 2
-        float centerY = 300; // 600 / 2
+        float centerX = output.getWorldWidth() / 2f;
+        float centerY = output.getWorldHeight() / 2f;
 
         // 3. draw pause Text
         String title = "PAUSED";

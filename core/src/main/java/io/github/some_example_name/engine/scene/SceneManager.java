@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.github.some_example_name.engine.util.Validation;
+
 /**
  * Scene coordinator.
  * Handles registration, activation, lifecycle dispatch, and cleanup.
@@ -108,6 +110,7 @@ public final class SceneManager {
     }
 
     public void update(float delta) {
+        Validation.requireValidDelta(delta);
         EngineScreen current = active;
         if (current != null) {
             current.update(delta);
@@ -115,6 +118,7 @@ public final class SceneManager {
     }
 
     public void render(float delta) {
+        Validation.requireValidDelta(delta);
         EngineScreen current = active;
         if (current != null) {
             current.render(delta);
@@ -122,6 +126,7 @@ public final class SceneManager {
     }
 
     public void runFrame(float delta) {
+        Validation.requireValidDelta(delta);
         update(delta);
         render(delta);
     }
@@ -149,7 +154,7 @@ public final class SceneManager {
 
     private void initialiseIfNeeded(EngineScreen scene) {
         if (!initialisedScenes.contains(scene)) {
-            scene.initialize();
+            scene.initialise();
             initialisedScenes.add(scene);
         }
     }

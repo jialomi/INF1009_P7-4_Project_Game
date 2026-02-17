@@ -34,7 +34,18 @@ public class OutputManager implements Disposable {
     private static final float WORLD_WIDTH = 800;
     private static final float WORLD_HEIGHT = 600;
 
+    // state tracking
+    private boolean initialised = false; // to prevent multiple init calls
+    private boolean disposed = false; // to prevent multiple dispose calls
+
     public void initialize() {
+        if (disposed) {
+            throw new IllegalStateException("OutputManager is disposed and cannot be reinitialised");
+        }
+        if (initialised) {
+            return; // already initialized, do nothing (idempotent)
+        }
+
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
 
@@ -45,6 +56,17 @@ public class OutputManager implements Disposable {
         // center camera so (0,0) isnt in corner, but middle
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         camera.update();
+        initialised = true;
+    }
+
+    /**
+     * helper method to ensure OutputManager is initialized before use
+     * throws exception if not initialized, preventing null pointer errors later
+     */
+    private void ensureInitialised() {
+        if (!initialised || batch == null || camera == null || viewport == null) {
+            throw new IllegalStateException("OutputManager must be initialized before use.");
+        }
     }
 
     /**
@@ -64,6 +86,9 @@ public class OutputManager implements Disposable {
      * important as window size might be different from game size
      */
     public Vector2 getMouseInGameWorld() {
+        // ensure OutputManager is initialized before trying to use camera/viewport
+        ensureInitialised();
+
         // get raw mouse position from input
         float screenX = Gdx.input.getX();
         float screenY = Gdx.input.getY();
@@ -82,6 +107,9 @@ public class OutputManager implements Disposable {
      * clears screen to black and prepares batch for drawing
      */
     public void beginFrame() {
+        // ensure OutputManager is initialized before trying to draw
+        ensureInitialised();
+
         // clear screen to black (adds "black bars" if window aspect ratio is wrong)
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -98,6 +126,7 @@ public class OutputManager implements Disposable {
      * as long as its an Entity, draws it
      */
     public void drawEntity(Entity e) {
+        ensureInitialised(); // ensure OutputManager is initialized before trying to draw
         if (e.getTexture() != null) {
             batch.draw(e.getTexture(), e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
         }
@@ -117,10 +146,26 @@ public class OutputManager implements Disposable {
         return batch;
     }
 
+    public float getWorldWidth() {
+        return WORLD_WIDTH;
+    }
+
+    public float getWorldHeight() {
+        return WORLD_HEIGHT;
+    }
+
     @Override
     public void dispose() {
+        if (disposed) return; // already disposed, do nothing (idempotent)
+
         // SpriteBatch is heavy (uses GPU memory), so must dispose it manually
         if (batch != null)
             batch.dispose();
+
+        batch = null;
+        camera = null;
+        viewport = null;
+        disposed = true;
+        initialised = false; // allow reinitialization if needed
     }
 }

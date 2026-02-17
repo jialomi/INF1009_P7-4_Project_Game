@@ -20,6 +20,10 @@ public class IOManager implements Disposable {
     private DynamicInput dynamicInput;
     private OutputManager outputManager;
 
+    // state tracking
+    private boolean initialised = false; // to prevent multiple init calls
+    private boolean disposed = false; // to prevent multiple dispose calls
+
     /**
      * private constructor
      * prevents other classes from calling new IOManager()
@@ -49,14 +53,22 @@ public class IOManager implements Disposable {
      * call this inside GameMaster.create() to boot up system
      */
     public void init() {
+        if (disposed) {
+            throw new IllegalStateException("IOManager is disposed and cannot be reinitialised");
+        }
+        if (initialised) {
+            return; // already initialized, do nothing (idempotent)
+        }
         // initialize sub managers in specific order
         audio.initialize();
         outputManager.initialize();
         dynamicInput.initialize();
-
+        dynamicInput.setOutputManager(outputManager); // give input manager access to output manager for mouse position conversion
         // connect input logic to libgdx hardware listener
         // without this line, keyboard/mouse clicks wont register
         Gdx.input.setInputProcessor(dynamicInput);
+
+        initialised = true;
     }
 
     // getters
@@ -80,6 +92,9 @@ public class IOManager implements Disposable {
      */
     @Override
     public void dispose() {
+        if (disposed) {
+            return; // already disposed, do nothing (idempotent)
+        }
         if (audio != null)
             audio.dispose();
         if (outputManager != null)
@@ -89,5 +104,8 @@ public class IOManager implements Disposable {
 
         // disconnect input processor so libgdx stops sending events to a dead object
         Gdx.input.setInputProcessor(null);
+
+        disposed = true;
+        initialised = false; // allow reinitialization if needed
     }
 }

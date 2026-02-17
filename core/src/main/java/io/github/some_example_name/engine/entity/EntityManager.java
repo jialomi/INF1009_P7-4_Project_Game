@@ -1,100 +1,113 @@
 package io.github.some_example_name.engine.entity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-/**
- * Concrete implementation of IEntityManager.
- * 
- * This class manages the lifecycle of all entities using a HashMap
- * for 0(1) lookups by UUID
- * 
- * Design: Uses composition - EntityManager OWNS the entities.
- */
-
-public class EntityManager implements IEntityManager {
+import io.github.some_example_name.engine.util.Validation;
   
-  // ===== ATTRIBUTES =====
-  private final Map<UUID, Entity> entities;
-  private final List<UUID> pendingRemoval;
+public class EntityManager implements IEntityManager {
 
-  // ===== CONSTRUCTOR =====
-  public EntityManager() {
-    this.entities = new HashMap<>();
-    this.pendingRemoval = new ArrayList<>();
-  }
+    private final Map<UUID, Entity> entities = new LinkedHashMap<>();
+    private final List<Entity> pendingAdd = new ArrayList<>();
+    private final Set<UUID> pendingRemove = new LinkedHashSet<>();
+    private boolean updating = false;
 
-    // TODO: Implement create() method
     @Override
     public UUID create(Entity entity) {
-      if (entity == null) {
-        throw new IllegalArgumentException("Cannot create null entity");
-      }
+        if (entity == null) {
+            throw new IllegalArgumentException("Cannot create null entity");
+        }
 
-      UUID id = entity.getId();
-      entities.put(id, entity);
+        if (updating) {
+            pendingAdd.add(entity);
+            return entity.getId();
+        }
 
-      return id;
+        entities.put(entity.getId(), entity);
+        return entity.getId();
     }
 
-    // TODO: Implement remove() method
     @Override
     public Entity remove(UUID id) {
-      if (id == null) {
-        return null;
-      }
-      return entities.remove(id);
+        if (id == null) return null;
+
+        Entity existing = entities.get(id);
+        if (existing == null) return null;
+
+        if (updating) {
+            pendingRemove.add(id);
+            return existing;
+        }
+
+        return entities.remove(id);
     }
 
-    // TODO: Implement get() method
     @Override
     public Entity get(UUID id) {
-      if (id == null) {
-        return null;
-      }
-      return entities.get(id);
+        if (id == null) return null;
+        return entities.get(id);
     }
 
-    // TODO: Implement update() method
     @Override
     public void update(float deltaTime) {
-      // Update all active entities
-      for (Entity entity: entities.values()) {
-        if (entity.isActive()) {
-          entity.update(deltaTime);
-        }
-      }
+        Validation.requireValidDelta(deltaTime);
 
-      // Process pending removals (safe - after iteration)
-      if (!pendingRemoval.isEmpty()) {
-        for (UUID id : pendingRemoval) {
-          remove(id);
+        updating = true;
+        try {
+            for (Entity entity : new ArrayList<>(entities.values())) {
+                if (entity != null && entity.isActive()) {
+                    entity.update(deltaTime);
+                }
+            }
+        } finally {
+            updating = false;
+            flushPendingChanges();
         }
-        pendingRemoval.clear();
-      }
     }
 
-    // TODO: Implement getAll() method
     @Override
     public Collection<Entity> getAll() {
-      return Collections.unmodifiableCollection(entities.values());
+        return Collections.unmodifiableCollection(new ArrayList<>(entities.values()));
     }
 
-    // TODO: Implement size() method
     @Override
     public int size() {
-      return entities.size();
+        return entities.size();
     }
 
-    // TODO: Implement contains() method
     @Override
     public boolean contains(UUID id) {
-      return id != null && entities.containsKey(id);
+        return id != null && entities.containsKey(id);
     }
 
-    // TODO: Implement clear() method
     @Override
     public void clear() {
-      entities.clear();
-      pendingRemoval.clear();
+        entities.clear();
+        pendingAdd.clear();
+        pendingRemove.clear();
+        updating = false;
+    }
+
+    private void flushPendingChanges() {
+        if (!pendingRemove.isEmpty()) {
+            for (UUID id : pendingRemove) {
+                entities.remove(id);
+            }
+            pendingRemove.clear();
+        }
+
+        if (!pendingAdd.isEmpty()) {
+            for (Entity entity : pendingAdd) {
+                entities.put(entity.getId(), entity);
+            }
+            pendingAdd.clear();
+        }
     }
 }

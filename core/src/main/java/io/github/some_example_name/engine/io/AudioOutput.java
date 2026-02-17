@@ -28,8 +28,23 @@ public class AudioOutput implements Disposable {
     // to track bgm already playing
     private String currentMusicPath = "";
 
+    // state tracking
+    private boolean initialised = false;    // to prevent multiple init calls
+    private boolean disposed = false;       // to prevent multiple dispose calls
+
     public void initialize() {
+        if (disposed) {
+            throw new IllegalStateException("AudioOutput is disposed and cannot be reinitialised");
+        }
+        if (initialised) return;    // already initialized, do nothing (idempotent)
         soundEffects = new HashMap<>();
+        initialised = true;
+    }
+
+    private void ensureInitialised() {
+        if (!initialised || soundEffects == null) {
+            throw new IllegalStateException("AudioOutput must be initialized before use.");
+        }
     }
 
     /**
@@ -38,6 +53,9 @@ public class AudioOutput implements Disposable {
      * @param fileName path to file (e.g. "jump.wav")
      */
     public void playSound(String fileName) {
+        ensureInitialised(); // ensure AudioOutput is initialized before playing sound
+        if (fileName == null || fileName.isBlank()) return; // ignore invalid file names
+        
         // check if this sound is already loaded
         if (!soundEffects.containsKey(fileName)) {
             // if no, check if file exists on disk
@@ -57,6 +75,9 @@ public class AudioOutput implements Disposable {
 
     // plays music continuously?
     public void playMusic(String fileName) {
+        ensureInitialised(); // ensure AudioOutput is initialized before playing music
+        if (fileName == null || fileName.isBlank()) return; // ignore invalid file names
+
         // check if requested song is already playing
         if (currentMusicPath.equals(fileName) && backgroundMusic != null && backgroundMusic.isPlaying()) {
             return; // do nothing & let it keep playing, without restarting
@@ -119,6 +140,8 @@ public class AudioOutput implements Disposable {
 
     @Override
     public void dispose() {
+        if (disposed) return; // already disposed, do nothing (idempotent)
+
         // loop through every sound in cache and dispose it
         if (soundEffects != null) {
             for (Sound s : soundEffects.values()) {
@@ -130,5 +153,8 @@ public class AudioOutput implements Disposable {
         if (backgroundMusic != null) {
             backgroundMusic.dispose();
         }
+        currentMusicPath = "";
+        disposed = true;
+        initialised = false; // allow reinitialization if needed
     }
 }

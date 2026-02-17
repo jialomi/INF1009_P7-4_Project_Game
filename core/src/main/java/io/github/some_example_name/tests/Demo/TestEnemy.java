@@ -17,7 +17,8 @@ public class TestEnemy extends RenderableEntity implements Collidable {
     
     private float speed = 150f;
     private float soundTimer = 0f;
-    private float slideDirection = 1f; 
+    private float slideDirection = 1f;
+    private float lastDelta = 1f / 60f; // Default to 1/60th of a second for initial movement calculations
 
     private MovementManager movementManager;
 
@@ -34,6 +35,9 @@ public class TestEnemy extends RenderableEntity implements Collidable {
 
     @Override
     public void update(float deltaTime) {
+        if (!Float.isNaN(deltaTime) && !Float.isInfinite(deltaTime) && deltaTime > 0f) {
+            lastDelta = deltaTime;
+        }
         if (soundTimer > 0) soundTimer -= deltaTime;
         this.setTexture(redTexture); 
 
@@ -66,7 +70,7 @@ public class TestEnemy extends RenderableEntity implements Collidable {
             if (getPositionY() > wall.getPositionY()) {
                 setPosition(getPositionX(), wall.getPositionY() + wall.getHeight());
                 float slideSpeed = 100f; 
-                float dt = 0.016f; 
+                float dt = Math.max(0f, Math.min(lastDelta, 1f / 30f)); // Cap delta time to 1/30th second (30 FPS)
                 setPosition(getPositionX() + (slideSpeed * slideDirection * dt), getPositionY());
             }
         }

@@ -5,6 +5,7 @@ import io.github.some_example_name.engine.collision.CollisionManager;
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.entity.EntityManager;
 import io.github.some_example_name.engine.movement.MovementManager;
+import io.github.some_example_name.engine.util.Validation;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ public abstract class AbstractScene implements EngineScreen{
     }
 
     @Override
-    public final void initialize() {
+    public final void initialise() {
         if (initialised) {
             return;
         }
@@ -82,7 +83,7 @@ public abstract class AbstractScene implements EngineScreen{
     @Override
     public final void update(float delta) {
         ensureInitialised();
-        validateDelta(delta);
+        Validation.requireValidDelta(delta);
 
         entityManager.update(delta);
         collisionManager.update();
@@ -141,14 +142,7 @@ public abstract class AbstractScene implements EngineScreen{
             throw new IllegalStateException("Scene must be initialised before update/render.");
         }
     }
-
-    private static void validateDelta(float delta) {
-        if (Float.isNaN(delta) || Float.isInfinite(delta) || delta < 0f) {
-            throw new IllegalArgumentException("Delta time must be finite and >= 0.");
-        }
-    }
-    
-} 
+}
 
         
 

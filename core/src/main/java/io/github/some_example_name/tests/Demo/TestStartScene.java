@@ -1,6 +1,5 @@
 package io.github.some_example_name.tests.Demo;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -32,7 +31,7 @@ public class TestStartScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.ENTER)) {
             System.out.println(">> STARTING GAME...");
             SceneManager.getInstance().setActive("main");
         }
@@ -51,8 +50,11 @@ public class TestStartScene extends AbstractScene {
         // 3. calculate center based on virtual resolution (800x600)
         // do not use Gdx.graphics.getWidth() because that is the window size
         GlyphLayout layout = new GlyphLayout(font, text);
-        float x = (800 - layout.width) / 2f;
-        float y = (600 + layout.height) / 2f;
+
+        float worldWidth = output.getWorldWidth();
+        float worldHeight = output.getWorldHeight();
+        float x = (worldWidth - layout.width) / 2f;
+        float y = (worldHeight + layout.height) / 2f;
 
         // 4. draw using engine's batch
         font.draw(output.getBatch(), layout, x, y);

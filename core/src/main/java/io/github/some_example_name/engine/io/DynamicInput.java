@@ -17,22 +17,49 @@ public class DynamicInput implements InputProcessor, Disposable {
     // key = KeyCode (integer), value = IsPressed (boolean)
     private Map<Integer, Boolean> keyState;
     private Map<Integer, Boolean> keyJustPressed;
+    private OutputManager outputManager; // reference to output manager for mouse position conversion
+
+    // state tracking
+    private boolean initialised = false; // to prevent multiple init calls
+    private boolean disposed = false; // to prevent multiple dispose calls
 
     // removed
     // private Vector2 mousePosition;
 
     public void initialize() {
+        if (disposed) {
+            throw new IllegalStateException("DynamicInput is disposed and cannot be reinitialised");
+        }
+        if (initialised) {
+            return; // already initialized, do nothing (idempotent)
+        }
         keyState = new HashMap<>();
         keyJustPressed = new HashMap<>();
 
         // removed
         // mousePosition = new Vector2();
+        initialised = true;
+    }
+
+    /**
+     * helper method to ensure DynamicInput is initialized before use
+     * throws exception if not initialized, preventing null pointer errors later
+     */
+    private void ensureInitialised() {
+        if (!initialised || keyState == null || keyJustPressed == null) {
+            throw new IllegalStateException("DynamicInput must be initialized before use.");
+        }
+    }
+
+    public void setOutputManager(OutputManager outputManager) {
+        this.outputManager = outputManager;
     }
 
     /**
      * checks if a key is currently held down
      */
     public boolean isKeyPressed(int keycode) {
+        ensureInitialised(); // ensure DynamicInput is initialized before checking key state
         return keyState.getOrDefault(keycode, false);
     }
 
@@ -41,6 +68,7 @@ public class DynamicInput implements InputProcessor, Disposable {
      * good to prevent unwanted repeated actions instantly
      */
     public boolean isKeyJustPressed(int keycode) {
+        ensureInitialised(); // ensure DynamicInput is initialized before checking key state
         boolean pressed = keyJustPressed.getOrDefault(keycode, false);
         if (pressed) {
             // consume press so it returns false next time asked
@@ -50,13 +78,8 @@ public class DynamicInput implements InputProcessor, Disposable {
     }
 
     public Vector2 getMousePosition() {
-        // returning mousePosition directly might introduce a bug
-        // where the mousePosition returned is not converted
-        // from actual pixels to in game world pixels
-        // return mousePosition;
-
-        // fetch real position from engine, not raw pixel
-        return IOManager.getInstance().getOutputManager().getMouseInGameWorld();
+        if (outputManager == null) return new Vector2();
+        return outputManager.getMouseInGameWorld();
     }
 
     // libgdx hardware callbacks (os calls these)
@@ -64,6 +87,7 @@ public class DynamicInput implements InputProcessor, Disposable {
 
     @Override
     public boolean keyDown(int keycode) {
+        ensureInitialised(); // ensure DynamicInput is initialized before handling input
         keyState.put(keycode, true); // remember key is held down
         keyJustPressed.put(keycode, true); // mark key as just pressed
         return true; // return true to say handled this event
@@ -71,6 +95,7 @@ public class DynamicInput implements InputProcessor, Disposable {
 
     @Override
     public boolean keyUp(int keycode) {
+        ensureInitialised(); // ensure DynamicInput is initialized before handling input
         keyState.put(keycode, false); // key is let go
         return true;
     }
@@ -121,7 +146,13 @@ public class DynamicInput implements InputProcessor, Disposable {
 
     @Override
     public void dispose() {
-        keyState.clear();
-        keyJustPressed.clear();
+        if (disposed) return; // already disposed, do nothing (idempotent)
+        if (keyState != null) keyState.clear();
+        if (keyJustPressed != null) keyJustPressed.clear();
+        keyState = null;
+        keyJustPressed = null;
+        outputManager = null;
+        disposed = true;
+        initialised = false; // allow reinitialization if needed
     }
 }

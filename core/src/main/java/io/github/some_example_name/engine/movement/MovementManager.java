@@ -1,6 +1,7 @@
 package io.github.some_example_name.engine.movement;
 
 import com.badlogic.gdx.math.Vector2;
+import java.util.function.IntPredicate;
 
 import io.github.some_example_name.engine.entity.Entity;
 
@@ -16,7 +17,12 @@ public class MovementManager {
         this.helper = new MovementCalculation();
     }
     
-    // Player Movement
+    // Player Movement - Main method
+    public void handlePlayerMovement(Entity entity, float speed, float deltaTime, IntPredicate isPressed) {
+        playerController.handleMovement(entity, speed, deltaTime, isPressed);
+    }
+
+    // Player Movement - Backward-compatible path
     public void handlePlayerMovement(Entity entity, float speed, float deltaTime) {
         playerController.handleMovement(entity, speed, deltaTime);
     }

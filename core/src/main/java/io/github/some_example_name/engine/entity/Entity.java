@@ -21,8 +21,6 @@ public abstract class Entity {
     private float velocityY;            // Velocity in Y direction
     private boolean active;             // Whether this entity is active/alive
 
-    // TODO: Add constructor here
-
     // Create a new entity at the origin (0,0).
     public Entity() {
         this.id = UUID.randomUUID();
@@ -42,8 +40,6 @@ public abstract class Entity {
         this.velocityY = 0.0f;
         this.active = true;
     }
-
-    // TODO: Add abstract methods here
 
     // ===== ABSTRACT METHODS =====
 
@@ -71,8 +67,6 @@ public abstract class Entity {
         positionX += velocityX * deltaTime;
         positionY += velocityY * deltaTime;
     }
-
-    // TODO: Add getters and setters here
 
     // ===== GETTERS =====
 
