@@ -80,7 +80,7 @@ public class TestMainScene extends AbstractScene {
             player.setPosition(400, 100);
         }
         if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.SPACE)) {
-            IOManager.getInstance().getAudio().playSound("test.wav");
+            IOManager.getInstance().getAudio().playSound("test.mp3");
         }
     }
 
