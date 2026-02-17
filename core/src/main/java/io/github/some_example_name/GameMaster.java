@@ -18,9 +18,9 @@ public class GameMaster extends Game {
     
     @Override
     public void create() {
-        System.out.println("╔════════════════════════════════════════╗");
-        System.out.println("║      GAME ENGINE INITIALIZATION        ║");
-        System.out.println("╚════════════════════════════════════════╝");
+        System.out.println("==========================================");
+        System.out.println("=      GAME ENGINE INITIALIZATION        =");
+        System.out.println("==========================================");
         
         ioManager = IOManager.getInstance();
         ioManager.init(); 
@@ -39,7 +39,7 @@ public class GameMaster extends Game {
         // Start at the Menu
         sceneManager.setActive("start");
         
-        System.out.println("✓ Engine Online: Start Scene Loaded");
+        System.out.println("Engine Online: Start Scene Loaded");
     }
     
     @Override
