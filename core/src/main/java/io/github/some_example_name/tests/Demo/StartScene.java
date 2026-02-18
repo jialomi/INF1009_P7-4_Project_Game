@@ -10,13 +10,13 @@ import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
 
-public class TestStartScene extends AbstractScene {
+public class StartScene extends AbstractScene {
 
     private final SceneManager sceneManager;
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
 
-    public TestStartScene(SceneManager sceneManager) {
+    public StartScene(SceneManager sceneManager) {
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }

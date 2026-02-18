@@ -13,7 +13,7 @@ import io.github.some_example_name.engine.scene.SceneManager;
 import io.github.some_example_name.engine.collision.Collidable;
 import java.util.Locale;
 
-public class TestMainScene extends AbstractScene {
+public class MainScene extends AbstractScene {
 
     private static final int START_LIVES = 99;
     private static final float WIN_TIME_SECONDS = 45f;
@@ -27,7 +27,7 @@ public class TestMainScene extends AbstractScene {
     private final SceneManager sceneManager;
 
 
-    private TestPlayer player;
+    private Player player;
     private BitmapFont font;
 
     private int lives;
@@ -40,7 +40,7 @@ public class TestMainScene extends AbstractScene {
     private float waveTimer;
     private static final float WAVE_INTERVAL = 12f;
 
-    public TestMainScene(SceneManager sceneManager) {
+    public MainScene(SceneManager sceneManager) {
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }
@@ -62,10 +62,10 @@ public class TestMainScene extends AbstractScene {
         wave = 1;
         waveTimer = 0f;
 
-        createEntity(new TestWall(200, 300, 64));
-        createEntity(new TestWall(550, 400, 64));
+        createEntity(new Wall(200, 300, 64));
+        createEntity(new Wall(550, 400, 64));
 
-        player = new TestPlayer("Hero", 400, 100);
+        player = new Player("Hero", 400, 100);
         OutputManager output = IOManager.getInstance().getOutputManager();
         createSideBoundaryWalls(output);
         // Keep player within side walls
@@ -87,8 +87,8 @@ public class TestMainScene extends AbstractScene {
         float worldW = output.getWorldWidth();
         float worldH = output.getWorldHeight();
 
-        createEntity(new TestBoundaryWall(0f, 0f, BORDER_THICKNESS, worldH));
-        createEntity(new TestBoundaryWall(worldW - BORDER_THICKNESS, 0f, BORDER_THICKNESS, worldH));
+        createEntity(new BoundaryWall(0f, 0f, BORDER_THICKNESS, worldH));
+        createEntity(new BoundaryWall(worldW - BORDER_THICKNESS, 0f, BORDER_THICKNESS, worldH));
     }
 
     @Override
@@ -137,8 +137,8 @@ public class TestMainScene extends AbstractScene {
     private void updateEnemyDifficulty() {
         float scaledSpeed = Math.min(BASE_ENEMY_SPEED + elapsed * 3f + (wave - 1) * 25f, MAX_ENEMY_SPEED);
         for (Entity e : getEntities()) {
-            if (e instanceof TestEnemy) {
-                ((TestEnemy) e).setSpeed(scaledSpeed);
+            if (e instanceof Enemy) {
+                ((Enemy) e).setSpeed(scaledSpeed);
             }
         }
     }
@@ -164,7 +164,7 @@ public class TestMainScene extends AbstractScene {
     private boolean overlapsWallAt(float x, float y, float w, float h) {
         Rectangle candidate = new Rectangle(x, y, w, h);
         for (Entity e : getEntities()) {
-            if ((e instanceof TestWall || e instanceof TestBoundaryWall) && e instanceof Collidable) {
+            if ((e instanceof Wall || e instanceof BoundaryWall) && e instanceof Collidable) {
                 Rectangle b = ((Collidable) e).getBounds();
                 if (b != null && candidate.overlaps(b)) return true;
             }
@@ -179,20 +179,20 @@ public class TestMainScene extends AbstractScene {
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
             float x = randomEnemySpawnX(output);
             if (!overlapsWallAt(x, y, ENEMY_WIDTH, ENEMY_WIDTH)) {
-                createEntity(new TestEnemy(name, x, y));
+                createEntity(new Enemy(name, x, y));
                 return;
             }
         }
 
         float fallbackX = (output.getWorldWidth() - ENEMY_WIDTH) * 0.5f;
-        createEntity(new TestEnemy(name, fallbackX, y));
+        createEntity(new Enemy(name, fallbackX, y));
     }
 
 
     private int countEnemies() {
         int count = 0;
         for (Entity e : getEntities()) {
-            if (e instanceof TestEnemy) count++;
+            if (e instanceof Enemy) count++;
         }
         return count;
     }
@@ -225,10 +225,10 @@ public class TestMainScene extends AbstractScene {
         if (font != null) font.dispose();
 
         for (Entity e : getEntities()) {
-            if (e instanceof TestWall) ((TestWall) e).dispose();
-            if (e instanceof TestBoundaryWall) ((TestBoundaryWall) e).dispose();
-            if (e instanceof TestPlayer) ((TestPlayer) e).dispose();
-            if (e instanceof TestEnemy) ((TestEnemy) e).dispose();
+            if (e instanceof Wall) ((Wall) e).dispose();
+            if (e instanceof BoundaryWall) ((BoundaryWall) e).dispose();
+            if (e instanceof Player) ((Player) e).dispose();
+            if (e instanceof Enemy) ((Enemy) e).dispose();
         }
     }
 }

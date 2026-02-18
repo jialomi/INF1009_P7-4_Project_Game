@@ -5,7 +5,7 @@ import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 import io.github.some_example_name.engine.movement.MovementManager;
 
-public class TestPlayer extends RenderableEntity implements Collidable {
+public class Player extends RenderableEntity implements Collidable {
 
     private static final float HIT_COOLDOWN_SECONDS = 0.75f;
     private float minX = 0f;
@@ -17,9 +17,9 @@ public class TestPlayer extends RenderableEntity implements Collidable {
     private float hitCooldown;
     private boolean hitEvent;
 
-    public TestPlayer(String name, float x, float y) {
+    public Player(String name, float x, float y) {
         super(x, y, 64, 64);
-        this.setTexture(DemoTextureFactory.createPlayerTexture());
+        this.setTexture(TextureFactory.createPlayerTexture());
         this.movementManager = new MovementManager();
     }
 
@@ -38,7 +38,7 @@ public class TestPlayer extends RenderableEntity implements Collidable {
 
     @Override
     public void onCollision(Collidable other) {
-        if (other instanceof TestEnemy) {
+        if (other instanceof Enemy) {
             if (hitCooldown <= 0f) {
                 hitEvent = true;
                 hitCooldown = HIT_COOLDOWN_SECONDS;

@@ -4,12 +4,12 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import io.github.some_example_name.engine.io.IOManager;
 import io.github.some_example_name.engine.scene.SceneManager;
-import io.github.some_example_name.tests.Demo.DemoTextureFactory;
-import io.github.some_example_name.tests.Demo.TestLoseScene;
-import io.github.some_example_name.tests.Demo.TestMainScene;
-import io.github.some_example_name.tests.Demo.TestPauseScene;
-import io.github.some_example_name.tests.Demo.TestStartScene;
-import io.github.some_example_name.tests.Demo.TestWinScene;
+import io.github.some_example_name.tests.Demo.TextureFactory;
+import io.github.some_example_name.tests.Demo.LoseScene;
+import io.github.some_example_name.tests.Demo.MainScene;
+import io.github.some_example_name.tests.Demo.PauseScene;
+import io.github.some_example_name.tests.Demo.StartScene;
+import io.github.some_example_name.tests.Demo.WinScene;
 
 public class GameMaster extends Game {
     private IOManager ioManager;
@@ -33,11 +33,11 @@ public class GameMaster extends Game {
         sceneManager = new SceneManager();
         sceneManager.setOnSceneActivated(() -> ioManager.getDynamicInput().clearJustPressed());
 
-        sceneManager.load("start", new TestStartScene(sceneManager));
-        sceneManager.load("main", new TestMainScene(sceneManager));
-        sceneManager.load("pause", new TestPauseScene(sceneManager));
-        sceneManager.load("win", new TestWinScene(sceneManager));
-        sceneManager.load("lose", new TestLoseScene(sceneManager));
+        sceneManager.load("start", new StartScene(sceneManager));
+        sceneManager.load("main", new MainScene(sceneManager));
+        sceneManager.load("pause", new PauseScene(sceneManager));
+        sceneManager.load("win", new WinScene(sceneManager));
+        sceneManager.load("lose", new LoseScene(sceneManager));
 
         sceneManager.setActive("start");
         System.out.println("Engine Online: Start Scene Loaded");
@@ -63,6 +63,6 @@ public class GameMaster extends Game {
     public void dispose() {
         if (sceneManager != null) sceneManager.dispose();
         if (ioManager != null) ioManager.dispose();
-        DemoTextureFactory.disposeAll();
+        TextureFactory.disposeAll();
     }
 }

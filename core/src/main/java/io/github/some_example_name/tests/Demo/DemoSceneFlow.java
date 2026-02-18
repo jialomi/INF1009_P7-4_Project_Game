@@ -7,7 +7,7 @@ public final class DemoSceneFlow {
 
     public static void restartMainRun(SceneManager sm) {
         sm.unload("main");
-        sm.load("main", new TestMainScene(sm));
+        sm.load("main", new MainScene(sm));
         sm.setActive("main");
     }
 

@@ -9,14 +9,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public final class DemoTextureFactory {
+public final class TextureFactory {
     private static TextureRegion player;
     private static TextureRegion enemyRed;
     private static TextureRegion enemyYellow;
     private static final Map<Integer, TextureRegion> wallBySize = new HashMap<>();
     private static final Map<String, TextureRegion> boundaryBySize = new HashMap<>();
 
-    private DemoTextureFactory() {}
+    private TextureFactory() {}
 
     public static TextureRegion createPlayerTexture() {
         if (player == null) player = createSolidTexture(64, 64, Color.BLUE);

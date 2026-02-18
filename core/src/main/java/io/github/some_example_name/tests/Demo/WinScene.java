@@ -1,4 +1,4 @@
-// core/src/main/java/io/github/some_example_name/tests/Demo/TestPauseScene.java
+// core/src/main/java/io/github/some_example_name/tests/Demo/TestWinScene.java
 package io.github.some_example_name.tests.Demo;
 
 import com.badlogic.gdx.Input;
@@ -11,12 +11,13 @@ import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
 import io.github.some_example_name.engine.io.DynamicInput;
 
-public class TestPauseScene extends AbstractScene {
+
+public class WinScene extends AbstractScene {
 
     private final SceneManager sceneManager;
     private BitmapFont font;
 
-    public TestPauseScene(SceneManager sceneManager) {
+    public WinScene(SceneManager sceneManager) {
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }
@@ -27,20 +28,16 @@ public class TestPauseScene extends AbstractScene {
     protected void onInitialise() {
         font = new BitmapFont();
         font.getData().setScale(1.8f);
-        font.setColor(Color.YELLOW);
+        font.setColor(Color.LIME);
     }
 
     @Override
     protected void onUpdate(float delta) {
         DynamicInput input = IOManager.getInstance().getDynamicInput();
-
-        if (input.isKeyJustPressed(Input.Keys.P)) {
-            sceneManager.setActive("main");
-            return;
-        } else if (input.isKeyJustPressed(Input.Keys.R)) {
+        if (input.isKeyJustPressed(Input.Keys.R)) {
             DemoSceneFlow.restartMainRun(sceneManager);
             return;
-        } else if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        } else if (input.isKeyJustPressed(Input.Keys.ENTER)) {
             DemoSceneFlow.goToStart(sceneManager);
             return;
         }
@@ -52,10 +49,11 @@ public class TestPauseScene extends AbstractScene {
         output.beginFrame();
 
         float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, "PAUSED", cx, 360f);
-        drawCentered(output, "P: RESUME", cx, 300f);
-        drawCentered(output, "R: RESTART RUN", cx, 265f);
-        drawCentered(output, "ESC: BACK TO START", cx, 230f);
+        drawCentered(output, "YOU WIN", cx, 370f);
+        drawCentered(output, "SCORE: " + DemoRunStats.getLastScore(), cx, 320f);
+        drawCentered(output, "SURVIVED: " + String.format("%.1fs", DemoRunStats.getLastSurvivalSeconds()), cx, 285f);
+        drawCentered(output, "BEST SCORE: " + DemoRunStats.getBestScore(), cx, 250f);
+        drawCentered(output, "R: RESTART   ENTER: START MENU", cx, 200f);
 
         output.endFrame();
     }

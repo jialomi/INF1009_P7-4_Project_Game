@@ -9,7 +9,7 @@ import io.github.some_example_name.engine.io.IOManager;
 import io.github.some_example_name.engine.movement.MovementManager;
 import com.badlogic.gdx.math.Rectangle;
 
-public class TestEnemy extends RenderableEntity implements Collidable {
+public class Enemy extends RenderableEntity implements Collidable {
 
     private final TextureRegion redTexture;
     private final TextureRegion yellowTexture;
@@ -22,10 +22,10 @@ public class TestEnemy extends RenderableEntity implements Collidable {
     private Collidable lastBounceWall;
     private float bounceLockTimer = 0f;
 
-    public TestEnemy(String name, float x, float y) {
+    public Enemy(String name, float x, float y) {
         super(x, y, 48, 48);
-        redTexture = DemoTextureFactory.createEnemyTexture(false);
-        yellowTexture = DemoTextureFactory.createEnemyTexture(true);
+        redTexture = TextureFactory.createEnemyTexture(false);
+        yellowTexture = TextureFactory.createEnemyTexture(true);
         this.setTexture(redTexture);
         this.movementManager = new MovementManager();
     }
@@ -58,7 +58,7 @@ public class TestEnemy extends RenderableEntity implements Collidable {
 
     @Override
     public void onCollision(Collidable other) {
-        if (other instanceof TestPlayer) {
+        if (other instanceof Player) {
             this.setTexture(yellowTexture);
             if (soundTimer <= 0f) {
                 IOManager.getInstance().getAudio().playSound("crash.mp3");
@@ -67,7 +67,7 @@ public class TestEnemy extends RenderableEntity implements Collidable {
             return;
         }
 
-        if (other instanceof TestWall || other instanceof TestBoundaryWall) {
+        if (other instanceof Wall || other instanceof BoundaryWall) {
             if (isSideContact(other) && isMovingTowardWall(other)) {
                 if (bounceLockTimer <= 0f || other != lastBounceWall) {
                     driftDir *= -1f;

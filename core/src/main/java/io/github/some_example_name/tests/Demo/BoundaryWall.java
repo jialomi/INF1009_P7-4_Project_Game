@@ -3,11 +3,11 @@ package io.github.some_example_name.tests.Demo;
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 
-public class TestBoundaryWall extends RenderableEntity implements Collidable {
+public class BoundaryWall extends RenderableEntity implements Collidable {
 
-    public TestBoundaryWall(float x, float y, float width, float height) {
+    public BoundaryWall(float x, float y, float width, float height) {
         super(x, y, width, height);
-        this.setTexture(DemoTextureFactory.createBoundaryTexture((int) width, (int) height));
+        this.setTexture(TextureFactory.createBoundaryTexture((int) width, (int) height));
     }
 
     @Override

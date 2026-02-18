@@ -1,4 +1,4 @@
-// core/src/main/java/io/github/some_example_name/tests/Demo/TestWinScene.java
+// core/src/main/java/io/github/some_example_name/tests/Demo/TestLoseScene.java
 package io.github.some_example_name.tests.Demo;
 
 import com.badlogic.gdx.Input;
@@ -11,13 +11,12 @@ import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
 import io.github.some_example_name.engine.io.DynamicInput;
 
-
-public class TestWinScene extends AbstractScene {
+public class LoseScene extends AbstractScene {
 
     private final SceneManager sceneManager;
     private BitmapFont font;
 
-    public TestWinScene(SceneManager sceneManager) {
+    public LoseScene(SceneManager sceneManager) {
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }
@@ -28,12 +27,13 @@ public class TestWinScene extends AbstractScene {
     protected void onInitialise() {
         font = new BitmapFont();
         font.getData().setScale(1.8f);
-        font.setColor(Color.LIME);
+        font.setColor(Color.SCARLET);
     }
 
     @Override
     protected void onUpdate(float delta) {
         DynamicInput input = IOManager.getInstance().getDynamicInput();
+
         if (input.isKeyJustPressed(Input.Keys.R)) {
             DemoSceneFlow.restartMainRun(sceneManager);
             return;
@@ -49,7 +49,7 @@ public class TestWinScene extends AbstractScene {
         output.beginFrame();
 
         float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, "YOU WIN", cx, 370f);
+        drawCentered(output, "GAME OVER", cx, 370f);
         drawCentered(output, "SCORE: " + DemoRunStats.getLastScore(), cx, 320f);
         drawCentered(output, "SURVIVED: " + String.format("%.1fs", DemoRunStats.getLastSurvivalSeconds()), cx, 285f);
         drawCentered(output, "BEST SCORE: " + DemoRunStats.getBestScore(), cx, 250f);

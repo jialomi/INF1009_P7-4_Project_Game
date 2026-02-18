@@ -4,13 +4,13 @@ import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 
 // === ISP FIX: Explicitly implements Collidable ===
-public class TestWall extends RenderableEntity implements Collidable {
+public class Wall extends RenderableEntity implements Collidable {
 
-    public TestWall(float x, float y, float size) {
+    public Wall(float x, float y, float size) {
         super(x, y, size, size);
         
         // === SRP FIX: Use Factory ===
-        this.setTexture(DemoTextureFactory.createWallTexture((int)size));
+        this.setTexture(TextureFactory.createWallTexture((int)size));
     }
 
     @Override
