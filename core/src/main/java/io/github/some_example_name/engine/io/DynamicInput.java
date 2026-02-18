@@ -82,14 +82,23 @@ public class DynamicInput implements InputProcessor, Disposable {
         return outputManager.getMouseInGameWorld();
     }
 
+    public void clearJustPressed() {
+        ensureInitialised();
+        keyJustPressed.clear();
+    }
+
     // libgdx hardware callbacks (os calls these)
     // these methods run whenever user touches keyboard/mouse
 
     @Override
     public boolean keyDown(int keycode) {
         ensureInitialised(); // ensure DynamicInput is initialized before handling input
+        boolean wasPressed = keyState.getOrDefault(keycode, false);
         keyState.put(keycode, true); // remember key is held down
-        keyJustPressed.put(keycode, true); // mark key as just pressed
+        // mark as just-pressed only on transition false -> true
+        if (!wasPressed) {
+            keyJustPressed.put(keycode, true);
+        }
         return true; // return true to say handled this event
     }
 

@@ -104,6 +104,20 @@ public class AudioOutput implements Disposable {
         }
     }
 
+    public void preloadSound(String fileName) {
+        ensureInitialised(); // ensure AudioOutput is initialized before preloading sound
+        if (fileName == null || fileName.isBlank()) return; // ignore invalid file names
+        if (soundEffects.containsKey(fileName)) return; // already loaded, do nothing
+
+        if (Gdx.files.internal(fileName).exists()) {
+            Sound s = Gdx.audio.newSound(Gdx.files.internal(fileName));
+            soundEffects.put(fileName, s);
+        } else {
+            // print to console if audio file is missing
+            System.err.println("[Audio] missing file: " + fileName);
+        }
+    }
+
     /**
      * sets volume for all future sound effects
      * does not change volume of sounds currently playing

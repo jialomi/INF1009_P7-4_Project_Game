@@ -7,18 +7,20 @@ import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 import io.github.some_example_name.engine.io.IOManager;
 import io.github.some_example_name.engine.movement.MovementManager;
+import com.badlogic.gdx.math.Rectangle;
 
 public class TestEnemy extends RenderableEntity implements Collidable {
 
-    private TextureRegion redTexture;
-    private TextureRegion yellowTexture;
+    private final TextureRegion redTexture;
+    private final TextureRegion yellowTexture;
+    private final MovementManager movementManager;
 
     private float speed = 150f;
     private float soundTimer = 0f;
-    private float slideDirection = 1f;
-    private float lastDelta = 1f / 60f;
-
-    private final MovementManager movementManager;
+    private float driftDir = Math.random() < 0.5 ? -1f : 1f; // Randomly start drifting left or right
+    private float driftSpeed = 80f;
+    private Collidable lastBounceWall;
+    private float bounceLockTimer = 0f;
 
     public TestEnemy(String name, float x, float y) {
         super(x, y, 48, 48);
@@ -34,89 +36,77 @@ public class TestEnemy extends RenderableEntity implements Collidable {
 
     @Override
     public void update(float deltaTime) {
-        if (!Float.isNaN(deltaTime) && !Float.isInfinite(deltaTime) && deltaTime > 0f) {
-            lastDelta = deltaTime;
-        }
-        if (soundTimer > 0) soundTimer -= deltaTime;
+        if (soundTimer > 0f) soundTimer -= deltaTime;
+        if (bounceLockTimer > 0f) bounceLockTimer -= deltaTime;
         this.setTexture(redTexture);
 
-        Vector2 velocity = new Vector2(0, -speed);
+        Vector2 velocity = new Vector2(driftDir * driftSpeed, -speed);
         movementManager.moveNpc(this, velocity, deltaTime);
 
-        if (getPositionY() < -50) {
-            float newX = (float) (Math.random() * 750);
+        if (getPositionY() < -50f) {
+            float newX = (float) (Math.random() * 750f);
             setPosition(newX, 650);
-            slideDirection = Math.random() > 0.5 ? 1f : -1f;
+            driftDir = Math.random() < 0.5 ? -1f : 1f; // Randomize drift direction on respawn
         }
     }
 
     @Override
+    public int getCollisionLayer() { return 1 << 2; } // Layer 3 for enemies
+
+    @Override
+    public int getCollisionMask() { return (1 << 0) | (1 << 1); } // Collides with walls and player, but not other enemies
+
+    @Override
     public void onCollision(Collidable other) {
         if (other instanceof TestPlayer) {
-            TestPlayer player = (TestPlayer) other;
             this.setTexture(yellowTexture);
-            if (soundTimer <= 0) {
+            if (soundTimer <= 0f) {
                 IOManager.getInstance().getAudio().playSound("crash.mp3");
                 soundTimer = 0.2f;
             }
-            if (this.getPositionY() > player.getPositionY() + player.getHeight() / 2) {
-                this.setPosition(this.getPositionX(), player.getPositionY() + player.getHeight());
-            }
-        }
-
-        if (other instanceof TestWall) {
-            resolveWallCollision((TestWall) other);
-            }
-        }
-
-    private void resolveWallCollision(TestWall wall) {
-        float eCX = getPositionX() + getWidth() / 2f;
-        float eCY = getPositionY() + getHeight() / 2f;
-        float wCX = wall.getPositionX() + wall.getWidth() / 2f;
-        float wCY = wall.getPositionY() + wall.getHeight() / 2f;
-
-        float dx = wCX - eCX;
-        float dy = wCY - eCY;
-
-        float overlapX = ((getWidth() + wall.getWidth()) / 2f) - Math.abs(dx);
-        float overlapY = ((getHeight() + wall.getHeight()) / 2f) - Math.abs(dy);
-
-        if (overlapX <= 0 || overlapY <= 0) return;
-
-        final float EPS = 0.01f;
-
-        // Side hit: resolve horizontally (prevents phasing through wall sides)
-        if (overlapX < overlapY) {
-            if (dx > 0f) setPosition(wall.getPositionX() - getWidth() - EPS, getPositionY());
-            else setPosition(wall.getPositionX() + wall.getWidth() + EPS, getPositionY());
-            slideDirection *= -1f;
             return;
         }
 
-        // Vertical hit
-        if (dy > 0f) {
-            // wall is above enemy -> place enemy below wall
-            setPosition(getPositionX(), wall.getPositionY() - getHeight() - EPS);
-        } else {
-            // enemy is above wall -> place enemy on top
-            setPosition(getPositionX(), wall.getPositionY() + wall.getHeight() + EPS);
-
-            // optional top slide
-            float dt = Math.max(0f, Math.min(lastDelta, 1f / 30f));
-            float oldX = getPositionX();
-            float slideSpeed = 100f;
-            setPosition(oldX + (slideSpeed * slideDirection * dt), getPositionY());
-
-            // if slide immediately re-penetrates, revert and bounce direction
-            if (getBounds().overlaps(wall.getBounds())) {
-                setPosition(oldX, getPositionY());
-                slideDirection *= -1f;
+        if (other instanceof TestWall || other instanceof TestBoundaryWall) {
+            if (isSideContact(other) && isMovingTowardWall(other)) {
+                if (bounceLockTimer <= 0f || other != lastBounceWall) {
+                    driftDir *= -1f;
+                    lastBounceWall = other;
+                    bounceLockTimer = 0.12f;
+                }
             }
         }
     }
 
+    private boolean isSideContact(Collidable wallLike) {
+        Rectangle e = getBounds();
+        Rectangle w = wallLike.getBounds();
+        if (e == null || w == null) return false;
+
+        float distToLeftFace  = Math.abs((e.x + e.width) - w.x);
+        float distToRightFace = Math.abs(e.x - (w.x + w.width));
+        float distToTopFace   = Math.abs(e.y - (w.y + w.height));
+        float distToBottomFace= Math.abs((e.y + e.height) - w.y);
+
+        float sideDist = Math.min(distToLeftFace, distToRightFace);
+        float vertDist = Math.min(distToTopFace, distToBottomFace);
+
+        return sideDist < vertDist;
+    }
+
+    private boolean isMovingTowardWall(Collidable wallLike) {
+        Rectangle e = getBounds();
+        Rectangle w = wallLike.getBounds();
+        if (e == null || w == null) return false;
+
+        float eCx = e.x + e.width * 0.5f;
+        float wCx = w.x + w.width * 0.5f;
+
+        // bounce only if drifting toward wall face
+        return (driftDir > 0f && wCx > eCx) || (driftDir < 0f && wCx < eCx);
+    }
+
     public void dispose() {
-        if (redTexture != null) redTexture.getTexture().dispose();
-        if (yellowTexture != null) yellowTexture.getTexture().dispose();
+        // no-op: textures are shared and owned by DemoTextureFactory
     }
 }

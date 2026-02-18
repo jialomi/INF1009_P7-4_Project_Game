@@ -9,10 +9,19 @@ import io.github.some_example_name.engine.io.IOManager;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
+import io.github.some_example_name.engine.io.DynamicInput;
 
 public class TestPauseScene extends AbstractScene {
 
+    private final SceneManager sceneManager;
     private BitmapFont font;
+
+    public TestPauseScene(SceneManager sceneManager) {
+        if (sceneManager == null) {
+            throw new IllegalArgumentException("SceneManager cannot be null");
+        }
+        this.sceneManager = sceneManager;
+    }
 
     @Override
     protected void onInitialise() {
@@ -23,18 +32,17 @@ public class TestPauseScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        SceneManager sm = SceneManager.getInstance();
+        DynamicInput input = IOManager.getInstance().getDynamicInput();
 
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.P)) {
-            sm.setActive("main");
-        }
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.R)) {
-            sm.unload("main");
-            sm.load("main", new TestMainScene());
-            sm.setActive("main");
-        }
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.ESCAPE)) {
-            sm.setActive("start");
+        if (input.isKeyJustPressed(Input.Keys.P)) {
+            sceneManager.setActive("main");
+            return;
+        } else if (input.isKeyJustPressed(Input.Keys.R)) {
+            DemoSceneFlow.restartMainRun(sceneManager);
+            return;
+        } else if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            DemoSceneFlow.goToStart(sceneManager);
+            return;
         }
     }
 

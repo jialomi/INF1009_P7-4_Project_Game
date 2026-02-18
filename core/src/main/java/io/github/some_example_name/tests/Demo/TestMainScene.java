@@ -4,11 +4,13 @@ package io.github.some_example_name.tests.Demo;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Rectangle;
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.io.IOManager;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
+import io.github.some_example_name.engine.collision.Collidable;
 import java.util.Locale;
 
 public class TestMainScene extends AbstractScene {
@@ -20,6 +22,10 @@ public class TestMainScene extends AbstractScene {
     private static final int MAX_ENEMIES = 9;
     private static final float INITIAL_SPAWN_INTERVAL = 7f;
     private static final float MIN_SPAWN_INTERVAL = 2.5f;
+    private static final float ENEMY_WIDTH = 48f;
+    private static final float BORDER_THICKNESS = 8f;
+    private final SceneManager sceneManager;
+
 
     private TestPlayer player;
     private BitmapFont font;
@@ -30,6 +36,16 @@ public class TestMainScene extends AbstractScene {
     private float spawnTimer;
     private float spawnInterval;
     private boolean ended;
+    private int wave;
+    private float waveTimer;
+    private static final float WAVE_INTERVAL = 12f;
+
+    public TestMainScene(SceneManager sceneManager) {
+        if (sceneManager == null) {
+            throw new IllegalArgumentException("SceneManager cannot be null");
+        }
+        this.sceneManager = sceneManager;
+    }
 
     @Override
     protected void onInitialise() {
@@ -43,30 +59,54 @@ public class TestMainScene extends AbstractScene {
         spawnTimer = 0f;
         spawnInterval = INITIAL_SPAWN_INTERVAL;
         ended = false;
+        wave = 1;
+        waveTimer = 0f;
 
         createEntity(new TestWall(200, 300, 64));
         createEntity(new TestWall(550, 400, 64));
 
         player = new TestPlayer("Hero", 400, 100);
         OutputManager output = IOManager.getInstance().getOutputManager();
-        player.setMovementBounds(0f, 0f, output.getWorldWidth(), output.getWorldHeight());
+        createSideBoundaryWalls(output);
+        // Keep player within side walls
+        player.setMovementBounds(
+            BORDER_THICKNESS,
+            0f,
+            output.getWorldWidth() - BORDER_THICKNESS,
+            output.getWorldHeight()
+        );
+
         createEntity(player);
 
-        createEntity(new TestEnemy("Drop 1", 100, 600));
-        createEntity(new TestEnemy("Drop 2", 300, 750));
-        createEntity(new TestEnemy("Drop 3", 600, 900));
+        spawnEnemySafely("Drop 1", 600f);
+        spawnEnemySafely("Drop 2", 750f);
+        spawnEnemySafely("Drop 3", 900f);
+    }
+
+    private void createSideBoundaryWalls(OutputManager output) {
+        float worldW = output.getWorldWidth();
+        float worldH = output.getWorldHeight();
+
+        createEntity(new TestBoundaryWall(0f, 0f, BORDER_THICKNESS, worldH));
+        createEntity(new TestBoundaryWall(worldW - BORDER_THICKNESS, 0f, BORDER_THICKNESS, worldH));
     }
 
     @Override
     protected void onUpdate(float delta) {
         if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.P)) {
-            SceneManager.getInstance().setActive("pause");
+            sceneManager.setActive("pause");
             return;
         }
 
         if (ended) return;
 
         elapsed += delta;
+        waveTimer += delta;
+        if (waveTimer >= WAVE_INTERVAL) {
+            waveTimer = 0f;
+            wave++;
+            spawnInterval = Math.max(MIN_SPAWN_INTERVAL, spawnInterval - 0.35f);
+        }
         score = (int) (elapsed * 100f);
 
         updateEnemyDifficulty();
@@ -77,7 +117,7 @@ public class TestMainScene extends AbstractScene {
             if (lives <= 0) {
                 ended = true;
                 DemoRunStats.recordRun(score, elapsed, false);
-                SceneManager.getInstance().setActive("lose");
+                sceneManager.setActive("lose");
                 return;
             }
         }
@@ -85,7 +125,7 @@ public class TestMainScene extends AbstractScene {
         if (elapsed >= WIN_TIME_SECONDS) {
             ended = true;
             DemoRunStats.recordRun(score, elapsed, true);
-            SceneManager.getInstance().setActive("win");
+            sceneManager.setActive("win");
             return;
         }
 
@@ -95,7 +135,7 @@ public class TestMainScene extends AbstractScene {
     }
 
     private void updateEnemyDifficulty() {
-        float scaledSpeed = Math.min(BASE_ENEMY_SPEED + elapsed * 4f, MAX_ENEMY_SPEED);
+        float scaledSpeed = Math.min(BASE_ENEMY_SPEED + elapsed * 3f + (wave - 1) * 25f, MAX_ENEMY_SPEED);
         for (Entity e : getEntities()) {
             if (e instanceof TestEnemy) {
                 ((TestEnemy) e).setSpeed(scaledSpeed);
@@ -111,10 +151,43 @@ public class TestMainScene extends AbstractScene {
         spawnInterval = Math.max(MIN_SPAWN_INTERVAL, spawnInterval - 0.2f);
 
         if (countEnemies() < MAX_ENEMIES) {
-            float x = 20f + (float) (Math.random() * 760f);
-            createEntity(new TestEnemy("Wave", x, 680f));
+            spawnEnemySafely("Wave", 680f);
         }
     }
+
+    private float randomEnemySpawnX(OutputManager output) {
+        float minX = BORDER_THICKNESS + 2f;
+        float maxX = output.getWorldWidth() - BORDER_THICKNESS - ENEMY_WIDTH - 2f;
+        return minX + (float) (Math.random() * Math.max(1f, (maxX - minX)));
+    }
+
+    private boolean overlapsWallAt(float x, float y, float w, float h) {
+        Rectangle candidate = new Rectangle(x, y, w, h);
+        for (Entity e : getEntities()) {
+            if ((e instanceof TestWall || e instanceof TestBoundaryWall) && e instanceof Collidable) {
+                Rectangle b = ((Collidable) e).getBounds();
+                if (b != null && candidate.overlaps(b)) return true;
+            }
+        }
+        return false;
+    }
+
+    private void spawnEnemySafely(String name, float y) {
+        OutputManager output = IOManager.getInstance().getOutputManager();
+        final int MAX_ATTEMPTS = 10;
+
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            float x = randomEnemySpawnX(output);
+            if (!overlapsWallAt(x, y, ENEMY_WIDTH, ENEMY_WIDTH)) {
+                createEntity(new TestEnemy(name, x, y));
+                return;
+            }
+        }
+
+        float fallbackX = (output.getWorldWidth() - ENEMY_WIDTH) * 0.5f;
+        createEntity(new TestEnemy(name, fallbackX, y));
+    }
+
 
     private int countEnemies() {
         int count = 0;
@@ -153,6 +226,7 @@ public class TestMainScene extends AbstractScene {
 
         for (Entity e : getEntities()) {
             if (e instanceof TestWall) ((TestWall) e).dispose();
+            if (e instanceof TestBoundaryWall) ((TestBoundaryWall) e).dispose();
             if (e instanceof TestPlayer) ((TestPlayer) e).dispose();
             if (e instanceof TestEnemy) ((TestEnemy) e).dispose();
         }

@@ -22,8 +22,19 @@ public class TestWall extends RenderableEntity implements Collidable {
     public void onCollision(Collidable other) {
         // Walls don't react
     }
+
+    @Override
+    public boolean isStaticBody() {
+        return true; // Walls are static bodies that don't move
+    }
+
+    @Override
+    public int getCollisionLayer() { return 1 << 0; } // Layer 1 for walls
+
+    @Override
+    public int getCollisionMask() { return (1 << 1) | (1 << 2); } // Collides with players and enemies, but not other walls
     
     public void dispose() {
-        if (getTexture() != null) getTexture().getTexture().dispose();
+        // no-op: textures are shared and owned by DemoTextureFactory
     }
 }

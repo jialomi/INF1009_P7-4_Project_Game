@@ -15,24 +15,22 @@ import io.github.some_example_name.engine.util.Validation;
 
 public final class SceneManager {
 
-    private static SceneManager instance;
-
     private final Map<String, EngineScreen> scenes;
     private final Set<EngineScreen> initialisedScenes;
 
     private EngineScreen active;
     private String activeName;
+    private static final Runnable NO_OP = () -> {};
+    private Runnable onSceneActivated = NO_OP;
 
-    private SceneManager() {
+    // For fixed-step updates, we would accumulate delta and run multiple updates if needed:
+    private static final float FIXED_STEP = 1f / 60f;
+    private static final int MAX_STEPS_PER_FRAME = 5;
+    private float accumulator = 0f;
+
+    public SceneManager() {
         this.scenes = new ConcurrentHashMap<>();
         this.initialisedScenes = Collections.newSetFromMap(new IdentityHashMap<>());
-    }
-
-    public static synchronized SceneManager getInstance() {
-        if (instance == null) {
-            instance = new SceneManager();
-        }
-        return instance;
     }
 
     public synchronized void load(String name, EngineScreen scene) {
@@ -99,6 +97,11 @@ public final class SceneManager {
         initialiseIfNeeded(next);
         active = next;
         activeName = name;
+        onSceneActivated.run(); // Notify listeners that a new scene is active
+    }
+
+    public synchronized void setOnSceneActivated(Runnable onSceneActivated) {
+        this.onSceneActivated = (onSceneActivated != null) ? onSceneActivated : NO_OP;
     }
 
     public EngineScreen getActive() {
@@ -127,8 +130,18 @@ public final class SceneManager {
 
     public void runFrame(float delta) {
         Validation.requireValidDelta(delta);
-        update(delta);
-        render(delta);
+
+        float clamped = Math.min(delta, 0.25f); // Prevent huge delta from causing issues
+        accumulator += clamped;
+
+        int steps = 0;
+        while (accumulator >= FIXED_STEP && steps < MAX_STEPS_PER_FRAME) {
+            update(FIXED_STEP);
+            accumulator -= FIXED_STEP;
+            steps++;
+        }
+
+        render(clamped);
     }
 
     public void resize(int width, int height) {
