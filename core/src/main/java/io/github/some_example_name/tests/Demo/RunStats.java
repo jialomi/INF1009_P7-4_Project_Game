@@ -1,12 +1,12 @@
 package io.github.some_example_name.tests.Demo;
 
-public final class DemoRunStats {
+public final class RunStats {
     private static int lastScore;
     private static float lastSurvivalSeconds;
     private static boolean lastRunWon;
     private static int bestScore;
 
-    private DemoRunStats() {}
+    private RunStats() {}
 
     public static void recordRun(int score, float survivalSeconds, boolean won) {
         lastScore = score;

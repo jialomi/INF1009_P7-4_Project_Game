@@ -38,10 +38,10 @@ public class PauseScene extends AbstractScene {
             sceneManager.setActive("main");
             return;
         } else if (input.isKeyJustPressed(Input.Keys.R)) {
-            DemoSceneFlow.restartMainRun(sceneManager);
+            SceneFlow.restartMainRun(sceneManager);
             return;
         } else if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            DemoSceneFlow.goToStart(sceneManager);
+            SceneFlow.goToStart(sceneManager);
             return;
         }
     }

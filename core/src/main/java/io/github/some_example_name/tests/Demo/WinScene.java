@@ -35,10 +35,10 @@ public class WinScene extends AbstractScene {
     protected void onUpdate(float delta) {
         DynamicInput input = IOManager.getInstance().getDynamicInput();
         if (input.isKeyJustPressed(Input.Keys.R)) {
-            DemoSceneFlow.restartMainRun(sceneManager);
+            SceneFlow.restartMainRun(sceneManager);
             return;
         } else if (input.isKeyJustPressed(Input.Keys.ENTER)) {
-            DemoSceneFlow.goToStart(sceneManager);
+            SceneFlow.goToStart(sceneManager);
             return;
         }
     }
@@ -50,9 +50,9 @@ public class WinScene extends AbstractScene {
 
         float cx = output.getWorldWidth() / 2f;
         drawCentered(output, "YOU WIN", cx, 370f);
-        drawCentered(output, "SCORE: " + DemoRunStats.getLastScore(), cx, 320f);
-        drawCentered(output, "SURVIVED: " + String.format("%.1fs", DemoRunStats.getLastSurvivalSeconds()), cx, 285f);
-        drawCentered(output, "BEST SCORE: " + DemoRunStats.getBestScore(), cx, 250f);
+        drawCentered(output, "SCORE: " + RunStats.getLastScore(), cx, 320f);
+        drawCentered(output, "SURVIVED: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, 285f);
+        drawCentered(output, "BEST SCORE: " + RunStats.getBestScore(), cx, 250f);
         drawCentered(output, "R: RESTART   ENTER: START MENU", cx, 200f);
 
         output.endFrame();

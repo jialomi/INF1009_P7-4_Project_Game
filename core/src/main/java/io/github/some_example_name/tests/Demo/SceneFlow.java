@@ -2,8 +2,8 @@ package io.github.some_example_name.tests.Demo;
 
 import io.github.some_example_name.engine.scene.SceneManager;
 
-public final class DemoSceneFlow {
-    private DemoSceneFlow() {}
+public final class SceneFlow {
+    private SceneFlow() {}
 
     public static void restartMainRun(SceneManager sm) {
         sm.unload("main");

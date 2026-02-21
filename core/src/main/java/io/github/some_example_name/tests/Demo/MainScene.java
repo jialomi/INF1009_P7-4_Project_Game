@@ -116,7 +116,7 @@ public class MainScene extends AbstractScene {
             lives--;
             if (lives <= 0) {
                 ended = true;
-                DemoRunStats.recordRun(score, elapsed, false);
+                RunStats.recordRun(score, elapsed, false);
                 sceneManager.setActive("lose");
                 return;
             }
@@ -124,7 +124,7 @@ public class MainScene extends AbstractScene {
 
         if (elapsed >= WIN_TIME_SECONDS) {
             ended = true;
-            DemoRunStats.recordRun(score, elapsed, true);
+            RunStats.recordRun(score, elapsed, true);
             sceneManager.setActive("win");
             return;
         }

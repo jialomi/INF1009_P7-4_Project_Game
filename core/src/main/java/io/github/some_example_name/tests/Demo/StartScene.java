@@ -37,7 +37,7 @@ public class StartScene extends AbstractScene {
     @Override
     protected void onUpdate(float delta) {
         if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.ENTER)) {
-            DemoSceneFlow.restartMainRun(sceneManager);
+            SceneFlow.restartMainRun(sceneManager);
             return;
         }
     }
