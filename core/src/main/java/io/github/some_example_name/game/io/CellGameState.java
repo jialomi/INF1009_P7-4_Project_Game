@@ -6,7 +6,7 @@ public class CellGameState {
     public int cancerStage;
     public float chemoTimer;
 
-    // Default constructor for potential JSON serialization
+    // default constructor for potential json serialization
     public CellGameState() {
     }
 

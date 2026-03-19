@@ -38,7 +38,7 @@ public class CellInputMapper {
             movement.x += 1;
         }
 
-        // Normalize to prevent faster diagonal movement
+        // normalize to prevent faster diagonal movement
         if (movement.len() > 0) {
             movement.nor();
         }
@@ -59,7 +59,7 @@ public class CellInputMapper {
     }
 
     public Vector2 getMouseSelection() {
-        // Relies on OutputManager to unproject the coordinates behind the scenes
+        // relies on OutputManager to unproject the coordinates behind the scenes
         return IOManager.getInstance().getDynamicInput().getMousePosition();
     }
 }

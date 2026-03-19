@@ -16,7 +16,7 @@ public class CellUIRenderer {
     }
 
     public void drawEntityHealthBar(Entity entity) {
-        // Placeholder: Can use a ShapeRenderer or a small Texture to draw a bar over
+        // placeholder: can use ShapeRenderer or small Texture to draw a bar over
         // entity.getPosition()
     }
 
@@ -45,7 +45,7 @@ public class CellUIRenderer {
             font.setColor(Color.RED);
             font.draw(output.getBatch(), "Chemo Reduction: " + String.format(Locale.US, "%.1fs", timeRemaining), 20,
                     top);
-            font.setColor(Color.WHITE); // Reset color
+            font.setColor(Color.WHITE); // reset color
         }
     }
 

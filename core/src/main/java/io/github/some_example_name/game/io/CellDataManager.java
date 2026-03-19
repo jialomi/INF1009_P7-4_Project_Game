@@ -13,13 +13,13 @@ public class CellDataManager {
     }
 
     public Object loadOrganLayout(String organId) {
-        // TODO: Return a parsed grid layout for the EntityManager to generate Walls
+        // TODO: return a parsed grid layout for EntityManager to generate Walls
         System.out.println("Loading layout for organ: " + organId);
         return new Object();
     }
 
     public CancerStageConfig loadStageStats(int stage) {
-        // Hardcoded balancing values as requested, could also be read from a JSON
+        // hardcoded balancing values as requested, could also be read from a json file
         switch (stage) {
             case 1:
                 return new CancerStageConfig(0.0f, false, false);
@@ -53,6 +53,6 @@ public class CellDataManager {
         } catch (Exception e) {
             System.err.println("Failed to load game, starting new run: " + e.getMessage());
         }
-        return new CellGameState("Lungs", 1, 1, 0.0f); // Default new game state
+        return new CellGameState("Lungs", 1, 1, 0.0f); // default new game state
     }
 }

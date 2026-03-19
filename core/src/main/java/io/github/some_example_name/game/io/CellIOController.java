@@ -3,8 +3,8 @@ package io.github.some_example_name.game.io;
 import com.badlogic.gdx.math.Vector2;
 
 /**
- * The main facade that the Game's OrganScene talks to.
- * It manages the flow of input and output specifically for the Tumor Cell game.
+ * main facade that game's OrganScene talks to
+ * manages flow of input and output specifically for tumor cell game
  */
 public class CellIOController {
 
@@ -23,20 +23,20 @@ public class CellIOController {
     }
 
     /**
-     * Called every frame by the active scene to poll inputs
+     * called every frame by active scene to poll inputs
      */
     public void update(float delta, CellGameState gameState) {
-        // 1. Process Movement
+        // process movement
         Vector2 moveDir = inputMapper.processMovementInput();
         if (moveDir.x != 0 || moveDir.y != 0) {
-            // In the scene, you would retrieve this and apply it via MovementManager
-            // e.g., Vector2 currentDir =
-            // ioController.getInputMapper().processMovementInput();
+            // in the scene, you would retrieve this and apply it via MovementManager
+            // e.g.
+            // Vector2 currentDir = ioController.getInputMapper().processMovementInput();
         }
     }
 
     /**
-     * Called during the render cycle to draw the HUD
+     * called during render cycle to draw hud
      */
     public void renderUI(CellGameState gameState, float currentSpreadPercentage, int currentExp, int requiredExp) {
         uiRenderer.drawCancerStage(gameState.cancerStage);
@@ -46,7 +46,7 @@ public class CellIOController {
     }
 
     /**
-     * Triggers the ending logic
+     * triggers ending scene logic
      */
     public void handleGameOver(boolean isBadEnding) {
         if (isBadEnding) {
@@ -63,7 +63,7 @@ public class CellIOController {
         }
     }
 
-    // Getters for subsystems so the Scene can access specific events
+    // getters for subsystems so the scene can access specific events
     public CellDataManager getDataManager() {
         return dataManager;
     }

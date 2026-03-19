@@ -14,7 +14,7 @@ public class CellAudioHandler {
     }
 
     public void playTCellDamage() {
-        getAudio().playSound("damage.mp3"); // Using existing damage/crash sound
+        getAudio().playSound("damage.mp3"); // using existing damage/crash sound
     }
 
     public void playRadioactiveAlert() {
