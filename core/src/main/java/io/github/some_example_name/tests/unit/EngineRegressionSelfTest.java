@@ -1,11 +1,14 @@
 package io.github.some_example_name.tests.unit;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.badlogic.gdx.math.Rectangle;
+
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.collision.CollisionManager;
+import io.github.some_example_name.engine.collision.CollisionShape;
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.io.DynamicInput;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public final class EngineRegressionSelfTest {
     public static void main(String[] args) {
@@ -15,6 +18,8 @@ public final class EngineRegressionSelfTest {
         testLayerMaskFiltering();
         testSceneTransitionInputNoChain();
         testWallBounceLockPreventsDoubleBounce();
+        testCircleNoFalsePositive();
+        testCircleOverlapDetected();
         System.out.println("All regression checks passed.");
     }
 
@@ -109,6 +114,36 @@ public final class EngineRegressionSelfTest {
 
         require(enemy.getDriftDir() > 0f,
             "Enemy should bounce again on opposite wall after lock expires");
+    }
+
+    private static void testCircleNoFalsePositive() {
+        AtomicInteger calls = new AtomicInteger(0);
+        CollisionManager cm = new CollisionManager((a, b, c) -> calls.incrementAndGet());
+
+        CircleBox a = new CircleBox(0f, 0f, 20f);
+        CircleBox b = new CircleBox(30f, 30f, 20f);
+
+        cm.addCollidable(a);
+        cm.addCollidable(b);
+        cm.update();
+
+        require(calls.get() == 0,
+            "Circles that don't touch should not collide even if bounding rects overlap");
+    }
+
+    private static void testCircleOverlapDetected() {
+        AtomicInteger calls = new AtomicInteger(0);
+        CollisionManager cm = new CollisionManager((a, b, c) -> calls.incrementAndGet());
+
+        CircleBox a = new CircleBox(0f, 0f, 20f);
+        CircleBox b = new CircleBox(25f, 0f, 20f);
+
+        cm.addCollidable(a);
+        cm.addCollidable(b);
+        cm.update();
+
+        require(calls.get() == 1,
+            "Overlapping circles should trigger exactly one collision callback");
     }
 
     private static void require(boolean ok, String msg) {
@@ -247,5 +282,27 @@ public final class EngineRegressionSelfTest {
             float wCx = w.x + w.width * 0.5f;
             return (driftDir > 0f && wCx > eCx) || (driftDir < 0f && wCx < eCx);
         }
+    }
+
+    private static final class CircleBox implements Collidable {
+        private final float x, y, radius;
+
+        CircleBox(float x, float y, float radius) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+        }
+
+        @Override
+        public CollisionShape getCollisionShape() {
+            return CollisionShape.circle(x + radius, y + radius, radius);
+        }
+
+        @Override
+        public Rectangle getBounds() {
+            return new Rectangle(x, y, radius * 2, radius * 2);
+        }
+
+        @Override public void onCollision(Collidable other) {}
     }
 }

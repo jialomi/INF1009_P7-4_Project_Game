@@ -6,15 +6,18 @@ public interface Collidable {
     Rectangle getBounds();
     void onCollision(Collidable other);
 
-    default int getCollisionLayer() {
-        return 1; // default layer 1 for all collidables, can be overridden for multiple layers
+    /** Override this to use a non-rectangular collision shape. */
+    default CollisionShape getCollisionShape() {
+        return CollisionShape.rectangle(getBounds());
     }
 
+    default int getCollisionLayer() { 
+        return 1;
+    }
     default int getCollisionMask() {
-        return 0xFFFF_FFFF; // default mask collides with all layers, can be overridden to specify which layers to collide with
+        return 0xFFFF_FFFF;
     }
-
     default boolean isStaticBody() {
-        return false; // default to dynamic body, can be overridden for static bodies that don't move
+        return false;
     }
 }

@@ -159,28 +159,70 @@ public class CollisionManager {
     }
 
     private CollisionContact buildContact(Collidable a, Collidable b) {
-        Rectangle ra = a.getBounds();
-        Rectangle rb = b.getBounds();
-        if (ra == null || rb == null || !ra.overlaps(rb)) return null;
+        CollisionShape sa = a.getCollisionShape();
+        CollisionShape sb = b.getCollisionShape();
+        if (sa == null || sb == null) return null;
 
-        float aCx = ra.x + ra.width * 0.5f;
-        float aCy = ra.y + ra.height * 0.5f;
-        float bCx = rb.x + rb.width * 0.5f;
-        float bCy = rb.y + rb.height * 0.5f;
+        CollisionShape.Type ta = sa.getType();
+        CollisionShape.Type tb = sb.getType();
 
-        float dx = bCx - aCx;
-        float dy = bCy - aCy;
+        if (ta == CollisionShape.Type.CIRCLE && tb == CollisionShape.Type.CIRCLE) {
+            return circleCircleContact(
+                (CollisionShape.CircleShape) sa,
+                (CollisionShape.CircleShape) sb
+            );
+        } else if (ta == CollisionShape.Type.RECTANGLE && tb == CollisionShape.Type.RECTANGLE) {
+            return rectRectContact(
+                ((CollisionShape.RectShape) sa).rect,
+                ((CollisionShape.RectShape) sb).rect
+            );
+        } else {
+            Rectangle ra = a.getBounds();
+            Rectangle rb = b.getBounds();
+            if (ra == null || rb == null || !ra.overlaps(rb)) return null;
+            return rectRectContact(ra, rb);
+        }
+    }
 
-        float overlapX = (ra.width + rb.width) * 0.5f - Math.abs(dx);
+    private CollisionContact circleCircleContact(
+            CollisionShape.CircleShape a,
+            CollisionShape.CircleShape b) {
+
+        float dx = b.cx - a.cx;
+        float dy = b.cy - a.cy;
+        float distSq = dx * dx + dy * dy;
+        float radSum = a.radius + b.radius;
+
+        if (distSq >= radSum * radSum) return null; // no overlap
+
+        float dist = (float) Math.sqrt(distSq);
+        float penetration = radSum - dist;
+
+        float nx, ny;
+        if (dist < 0.0001f) {
+            nx = 1f; ny = 0f;
+        } else {
+            nx = dx / dist;
+            ny = dy / dist;
+        }
+        return new CollisionContact(nx, ny, penetration);
+    }
+
+    private CollisionContact rectRectContact(Rectangle ra, Rectangle rb) {
+        if (!ra.overlaps(rb)) return null;
+
+        float aCx = ra.x + ra.width  * 0.5f,  aCy = ra.y + ra.height * 0.5f;
+        float bCx = rb.x + rb.width  * 0.5f,  bCy = rb.y + rb.height * 0.5f;
+        float dx = bCx - aCx,  dy = bCy - aCy;
+
+        float overlapX = (ra.width  + rb.width)  * 0.5f - Math.abs(dx);
         float overlapY = (ra.height + rb.height) * 0.5f - Math.abs(dy);
         if (overlapX <= 0f || overlapY <= 0f) return null;
 
         if (overlapX < overlapY) {
-            float nx = dx >= 0f ? 1f : -1f;
-            return new CollisionContact(nx, 0f, overlapX);
+            return new CollisionContact(dx >= 0f ? 1f : -1f, 0f, overlapX);
         } else {
-            float ny = dy >= 0f ? 1f : -1f;
-            return new CollisionContact(0f, ny, overlapY);
+            return new CollisionContact(0f, dy >= 0f ? 1f : -1f, overlapY);
         }
     }
 
@@ -195,15 +237,12 @@ public class CollisionManager {
         Entity ea = (Entity) a;
         Entity eb = (Entity) b;
         float sep = contact.getPenetration() + separationEpsilon;
+        float nx = contact.getNormalX();
+        float ny = contact.getNormalY();
+        float shareA = sep * (invMassA / sum);
+        float shareB = sep * (invMassB / sum);
 
-        if (contact.isHorizontal()) {
-            float nx = contact.getNormalX();
-            ea.setPosition(ea.getPositionX() - nx * sep * (invMassA / sum), ea.getPositionY());
-            eb.setPosition(eb.getPositionX() + nx * sep * (invMassB / sum), eb.getPositionY());
-        } else if (contact.isVertical()) {
-            float ny = contact.getNormalY();
-            ea.setPosition(ea.getPositionX(), ea.getPositionY() - ny * sep * (invMassA / sum));
-            eb.setPosition(eb.getPositionX(), eb.getPositionY() + ny * sep * (invMassB / sum));
-        }
+        ea.setPosition(ea.getPositionX() - nx * shareA, ea.getPositionY() - ny * shareA);
+        eb.setPosition(eb.getPositionX() + nx * shareB, eb.getPositionY() + ny * shareB);
     }
 }
