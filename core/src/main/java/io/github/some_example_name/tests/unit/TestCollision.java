@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.collision.CollisionManager;
+import io.github.some_example_name.engine.collision.CollisionShape;
 
 public class TestCollision extends ApplicationAdapter {
     private ShapeRenderer shape;
@@ -98,10 +99,14 @@ public class TestCollision extends ApplicationAdapter {
         }
 
         // Return bounding box for collision detection
-        @Override
         public Rectangle getBounds() {
             bounds.setPosition(x - radius, y - radius);
             return bounds;
+        }
+
+        @Override
+        public CollisionShape getCollisionShape() {
+            return CollisionShape.circle(x, y, radius);
         }
 
         // No action needed for circle
@@ -140,10 +145,14 @@ public class TestCollision extends ApplicationAdapter {
         }
 
         // Return bounding box for collision detection
-        @Override
         public Rectangle getBounds() {
             bounds.setPosition(x, y);
             return bounds;
+        }
+
+        @Override
+        public CollisionShape getCollisionShape() {
+            return CollisionShape.rectangle(getBounds());
         }
 
         // Change color when colliding

@@ -4,15 +4,18 @@ package io.github.some_example_name.tests.Demo;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import io.github.some_example_name.engine.collision.Collidable;
+import io.github.some_example_name.engine.collision.CollisionShape;
+import io.github.some_example_name.engine.collision.PhysicalBody;
 import io.github.some_example_name.engine.entity.RenderableEntity;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.AudioOutput;
 import io.github.some_example_name.engine.movement.MovementManager;
 import com.badlogic.gdx.math.Rectangle;
 
-public class Enemy extends RenderableEntity implements Collidable {
+public class Enemy extends RenderableEntity implements PhysicalBody {
 
     private final TextureRegion redTexture;
     private final TextureRegion yellowTexture;
+    private final AudioOutput audio;
     private final MovementManager movementManager;
 
     private float speed = 150f;
@@ -22,8 +25,12 @@ public class Enemy extends RenderableEntity implements Collidable {
     private Collidable lastBounceWall;
     private float bounceLockTimer = 0f;
 
-    public Enemy(String name, float x, float y) {
+    public Enemy(AudioOutput audio, String name, float x, float y) {
         super(x, y, 48, 48);
+        if (audio == null) {
+            throw new IllegalArgumentException("AudioOutput cannot be null");
+        }
+        this.audio = audio;
         redTexture = TextureFactory.createEnemyTexture(false);
         yellowTexture = TextureFactory.createEnemyTexture(true);
         this.setTexture(redTexture);
@@ -41,11 +48,12 @@ public class Enemy extends RenderableEntity implements Collidable {
         this.setTexture(redTexture);
 
         Vector2 velocity = new Vector2(driftDir * driftSpeed, -speed);
-        movementManager.moveNpc(this, velocity, deltaTime);
+        movementManager.applyVelocity(this, velocity, deltaTime);
 
         if (getPositionY() < -50f) {
             float newX = (float) (Math.random() * 750f);
             setPosition(newX, 650);
+            snapInterpolation();
             driftDir = Math.random() < 0.5 ? -1f : 1f; // Randomize drift direction on respawn
         }
     }
@@ -57,11 +65,16 @@ public class Enemy extends RenderableEntity implements Collidable {
     public int getCollisionMask() { return (1 << 0) | (1 << 1); } // Collides with walls and player, but not other enemies
 
     @Override
+    public CollisionShape getCollisionShape() {
+        return CollisionShape.rectangle(getBounds());
+    }
+
+    @Override
     public void onCollision(Collidable other) {
         if (other instanceof Player) {
             this.setTexture(yellowTexture);
             if (soundTimer <= 0f) {
-                IOManager.getInstance().getAudio().playSound("crash.mp3");
+                audio.playSound("crash.mp3");
                 soundTimer = 0.2f;
             }
             return;
@@ -80,7 +93,7 @@ public class Enemy extends RenderableEntity implements Collidable {
 
     private boolean isSideContact(Collidable wallLike) {
         Rectangle e = getBounds();
-        Rectangle w = wallLike.getBounds();
+        Rectangle w = wallLike.getBroadPhaseBounds();
         if (e == null || w == null) return false;
 
         float distToLeftFace  = Math.abs((e.x + e.width) - w.x);
@@ -96,7 +109,7 @@ public class Enemy extends RenderableEntity implements Collidable {
 
     private boolean isMovingTowardWall(Collidable wallLike) {
         Rectangle e = getBounds();
-        Rectangle w = wallLike.getBounds();
+        Rectangle w = wallLike.getBroadPhaseBounds();
         if (e == null || w == null) return false;
 
         float eCx = e.x + e.width * 0.5f;

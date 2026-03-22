@@ -13,6 +13,7 @@ public abstract class CollisionShape {
     public abstract Type getType();
     public abstract float getCenterX();
     public abstract float getCenterY();
+    public abstract Rectangle getBounds();
 
     public static CollisionShape circle(float centerX, float centerY, float radius) {
         return new CircleShape(centerX, centerY, radius);
@@ -39,6 +40,10 @@ public abstract class CollisionShape {
         public float getCenterY() {
             return cy;
         }
+        @Override
+        public Rectangle getBounds() {
+            return new Rectangle(cx - radius, cy - radius, radius * 2f, radius * 2f);
+        }
     }
 
     public static final class RectShape extends CollisionShape {
@@ -57,6 +62,10 @@ public abstract class CollisionShape {
         @Override
         public float getCenterY() {
             return rect.y + rect.height * 0.5f;
+        }
+        @Override
+        public Rectangle getBounds() {
+            return rect;
         }
     }
 }

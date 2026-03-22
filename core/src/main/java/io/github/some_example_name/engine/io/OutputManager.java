@@ -5,9 +5,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.some_example_name.engine.entity.Entity;
+import io.github.some_example_name.engine.entity.Renderable;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -18,25 +20,37 @@ import com.badlogic.gdx.math.Vector3;
 //  * behind simple methods like beginFrame() and drawEntity()
 //  */
 public class OutputManager implements Disposable {
-
-    // SpriteBatch is object that actually sends images to GPU
+    private final OutputConfiguration config;
     private SpriteBatch batch;
+    private OrthographicCamera worldCamera;
+    private OrthographicCamera uiCamera;
+    private Viewport worldViewport;
+    private Viewport uiViewport;
 
-    // camera determines where we are looking in game world
-    private OrthographicCamera camera;
+    private boolean initialised = false;
+    private boolean disposed = false;
+    private boolean frameActive = false;
 
-    // viewport handles how game looks on different screen sizes
-    // such as adding black bars if aspect ratio doesnt match
-    private Viewport viewport;
+    private boolean cameraBoundsEnabled = false;
+    private float cameraMinX;
+    private float cameraMinY;
+    private float cameraMaxX;
+    private float cameraMaxY;
 
-    // define a virtual resolution
-    // game thinks screen is always 800x600, regardless of real monitor size
-    private static final float WORLD_WIDTH = 800;
-    private static final float WORLD_HEIGHT = 600;
+    public OutputManager() {
+        this(new OutputConfiguration());
+    }
 
-    // state tracking
-    private boolean initialised = false; // to prevent multiple init calls
-    private boolean disposed = false; // to prevent multiple dispose calls
+    public OutputManager(OutputConfiguration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("OutputConfiguration cannot be null.");
+        }
+        this.config = config;
+        this.cameraMinX = config.getMinWorldWidth() * 0.5f;
+        this.cameraMinY = config.getMinWorldHeight() * 0.5f;
+        this.cameraMaxX = config.getMinWorldWidth() * 0.5f;
+        this.cameraMaxY = config.getMinWorldHeight() * 0.5f;
+    }
 
     public void initialize() {
         if (disposed) {
@@ -47,15 +61,15 @@ public class OutputManager implements Disposable {
         }
 
         batch = new SpriteBatch();
-        camera = new OrthographicCamera();
+        worldCamera = new OrthographicCamera();
+        uiCamera = new OrthographicCamera();
 
-        // FITVIEWPORT - specific tool that prevents content from running off screen
-        // scales entire game down to fit the window, maintaining aspect ratio
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        worldViewport = new ExtendViewport(config.getMinWorldWidth(), config.getMinWorldHeight(), worldCamera);
+        uiViewport = new ScreenViewport(uiCamera);
 
-        // center camera so (0,0) isnt in corner, but middle
-        camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
-        camera.update();
+        worldViewport.update((int) config.getMinWorldWidth(), (int) config.getMinWorldHeight(), true);
+        uiViewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        resetCameraToViewportCenter();
         initialised = true;
     }
 
@@ -64,7 +78,8 @@ public class OutputManager implements Disposable {
      * throws exception if not initialized, preventing null pointer errors later
      */
     private void ensureInitialised() {
-        if (!initialised || batch == null || camera == null || viewport == null) {
+        if (!initialised || batch == null || worldCamera == null || uiCamera == null
+                || worldViewport == null || uiViewport == null) {
             throw new IllegalStateException("OutputManager must be initialized before use.");
         }
     }
@@ -74,10 +89,18 @@ public class OutputManager implements Disposable {
      * updates viewport so game doesnt look stretched or squashed
      */
     public void resize(int width, int height) {
-        // 'true' parameter moves camera to center of new size
-        // without this, resizing window shifts view and hides text
-        if (viewport != null) {
-            viewport.update(width, height, true);
+        if (worldViewport != null) {
+            worldViewport.update(width, height, false);
+        }
+        if (uiViewport != null) {
+            uiViewport.update(width, height, true);
+        }
+        if (worldCamera != null) {
+            if (cameraBoundsEnabled) {
+                clampWorldCamera();
+            } else {
+                resetCameraToViewportCenter();
+            }
         }
     }
 
@@ -93,79 +116,176 @@ public class OutputManager implements Disposable {
         float screenX = Gdx.input.getX();
         float screenY = Gdx.input.getY();
 
-        // ask camera to translate to world units
-        // vector3 is required by unproject method
-        Vector3 worldPos = camera.unproject(new Vector3(screenX, screenY, 0),
-                viewport.getScreenX(), viewport.getScreenY(),
-                viewport.getScreenWidth(), viewport.getScreenHeight());
+        Vector3 worldPos = worldCamera.unproject(new Vector3(screenX, screenY, 0),
+                worldViewport.getScreenX(), worldViewport.getScreenY(),
+                worldViewport.getScreenWidth(), worldViewport.getScreenHeight());
 
         return new Vector2(worldPos.x, worldPos.y);
     }
 
-    /**
-     * call this at start of every render loop
-     * clears screen to black and prepares batch for drawing
-     */
     public void beginFrame() {
-        // ensure OutputManager is initialized before trying to draw
         ensureInitialised();
-
-        // clear screen to black (adds "black bars" if window aspect ratio is wrong)
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        if (frameActive) {
+            throw new IllegalStateException("Previous frame not ended. Call endFrame() before beginFrame().");
+        }
+        Gdx.gl.glClearColor(config.getClearRed(), config.getClearGreen(), config.getClearBlue(), config.getClearAlpha());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        frameActive = true;
+    }
 
-        // apply the camera updates to batch
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
+    public void beginWorld() {
+        ensureFrameActive();
+        applyWorldViewport();
+        worldCamera.update();
+        batch.setProjectionMatrix(worldCamera.combined);
         batch.begin();
     }
 
-    /**
-     * this method accepts any object that extends Entity
-     * doesnt care if its a Player, Enemy, or Wall
-     * as long as its an Entity, draws it
-     */
-    public void drawEntity(Entity e) {
-        ensureInitialised(); // ensure OutputManager is initialized before trying to draw
-        if (e.getTexture() != null) {
-            batch.draw(e.getTexture(), e.getPosition().x, e.getPosition().y, e.getWidth(), e.getHeight());
+    public void endWorld() {
+        if (batch.isDrawing()) {
+            batch.end();
         }
     }
 
-    /**
-     * call this at end of every render loop
-     * sends final batch of images to GPU
-     */
-    public void endFrame() {
-        if (batch.isDrawing())
-            batch.end();
+    public void beginUi() {
+        ensureFrameActive();
+        applyUiViewport();
+        uiCamera.update();
+        batch.setProjectionMatrix(uiCamera.combined);
+        batch.begin();
     }
 
-    // helper getter if need to access batch for drawing text in GameMaster
+    public void endUi() {
+        if (batch.isDrawing()) {
+            batch.end();
+        }
+    }
+
+    public void drawEntity(Entity e, float interpolationAlpha) {
+        ensureInitialised();
+        if (e instanceof Renderable) {
+            Renderable renderable = (Renderable) e;
+            if (renderable.getTexture() != null) {
+                batch.draw(renderable.getTexture(),
+                    e.getInterpolatedPositionX(interpolationAlpha),
+                    e.getInterpolatedPositionY(interpolationAlpha),
+                    e.getWidth(),
+                    e.getHeight());
+            }
+        }
+    }
+
+    public void endFrame() {
+        if (batch.isDrawing()) {
+            batch.end();
+        }
+        frameActive = false;
+    }
+
     public SpriteBatch getBatch() {
         return batch;
     }
 
     public float getWorldWidth() {
-        return WORLD_WIDTH;
+        return worldViewport != null ? worldViewport.getWorldWidth() : config.getMinWorldWidth();
     }
 
     public float getWorldHeight() {
-        return WORLD_HEIGHT;
+        return worldViewport != null ? worldViewport.getWorldHeight() : config.getMinWorldHeight();
+    }
+
+    public float getUiWidth() {
+        return uiViewport != null ? uiViewport.getWorldWidth() : Gdx.graphics.getWidth();
+    }
+
+    public float getUiHeight() {
+        return uiViewport != null ? uiViewport.getWorldHeight() : Gdx.graphics.getHeight();
+    }
+
+    public void updateCamera(float targetX, float targetY) {
+        ensureInitialised();
+        worldCamera.position.set(targetX, targetY, 0f);
+        if (cameraBoundsEnabled) {
+            clampWorldCamera();
+        }
+    }
+
+    public void setCameraBounds(float minX, float minY, float maxX, float maxY) {
+        if (minX > maxX || minY > maxY) {
+            throw new IllegalArgumentException("Camera bounds are invalid.");
+        }
+        cameraBoundsEnabled = true;
+        cameraMinX = minX;
+        cameraMinY = minY;
+        cameraMaxX = maxX;
+        cameraMaxY = maxY;
+        clampWorldCamera();
+    }
+
+    public void clearCameraBounds() {
+        cameraBoundsEnabled = false;
+    }
+
+    public Vector2 getCameraPosition() {
+        ensureInitialised();
+        return new Vector2(worldCamera.position.x, worldCamera.position.y);
     }
 
     @Override
     public void dispose() {
-        if (disposed) return; // already disposed, do nothing (idempotent)
-
-        // SpriteBatch is heavy (uses GPU memory), so must dispose it manually
-        if (batch != null)
+        if (disposed) return;
+        if (batch != null) {
             batch.dispose();
+        }
 
         batch = null;
-        camera = null;
-        viewport = null;
+        worldCamera = null;
+        uiCamera = null;
+        worldViewport = null;
+        uiViewport = null;
         disposed = true;
-        initialised = false; // allow reinitialization if needed
+        initialised = false;
+        frameActive = false;
+    }
+
+    private void ensureFrameActive() {
+        ensureInitialised();
+        if (!frameActive) {
+            throw new IllegalStateException("beginFrame() must be called before drawing.");
+        }
+        if (batch.isDrawing()) {
+            throw new IllegalStateException("A drawing pass is already active.");
+        }
+    }
+
+    private void applyWorldViewport() {
+        worldViewport.apply();
+    }
+
+    private void applyUiViewport() {
+        uiViewport.apply();
+    }
+
+    private void resetCameraToViewportCenter() {
+        worldCamera.position.set(getWorldWidth() * 0.5f, getWorldHeight() * 0.5f, 0f);
+        worldCamera.update();
+    }
+
+    private void clampWorldCamera() {
+        float halfVisibleWidth = getWorldWidth() * 0.5f;
+        float halfVisibleHeight = getWorldHeight() * 0.5f;
+
+        float minCenterX = Math.min(cameraMinX + halfVisibleWidth, cameraMaxX - halfVisibleWidth);
+        float maxCenterX = Math.max(cameraMinX + halfVisibleWidth, cameraMaxX - halfVisibleWidth);
+        float minCenterY = Math.min(cameraMinY + halfVisibleHeight, cameraMaxY - halfVisibleHeight);
+        float maxCenterY = Math.max(cameraMinY + halfVisibleHeight, cameraMaxY - halfVisibleHeight);
+
+        worldCamera.position.x = clamp(worldCamera.position.x, minCenterX, maxCenterX);
+        worldCamera.position.y = clamp(worldCamera.position.y, minCenterY, maxCenterY);
+        worldCamera.update();
+    }
+
+    private float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(value, max));
     }
 }

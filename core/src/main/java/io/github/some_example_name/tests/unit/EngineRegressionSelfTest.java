@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.collision.CollisionManager;
 import io.github.some_example_name.engine.collision.CollisionShape;
+import io.github.some_example_name.engine.collision.PhysicalBody;
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.io.DynamicInput;
 
@@ -20,6 +21,8 @@ public final class EngineRegressionSelfTest {
         testWallBounceLockPreventsDoubleBounce();
         testCircleNoFalsePositive();
         testCircleOverlapDetected();
+        testCircleRectNoFalsePositive();
+        testCircleRectOverlapDetected();
         System.out.println("All regression checks passed.");
     }
 
@@ -46,7 +49,7 @@ public final class EngineRegressionSelfTest {
         cm.addCollidable(enemy);
         cm.addCollidable(wall);
         cm.update();
-        require(!enemy.getBounds().overlaps(wall.getBounds()), "enemy must be separated from wall");
+        require(!enemy.getBroadPhaseBounds().overlaps(wall.getBroadPhaseBounds()), "enemy must be separated from wall");
     }
 
     private static void testResolveOncePerFrame() {
@@ -146,6 +149,36 @@ public final class EngineRegressionSelfTest {
             "Overlapping circles should trigger exactly one collision callback");
     }
 
+    private static void testCircleRectNoFalsePositive() {
+        AtomicInteger calls = new AtomicInteger(0);
+        CollisionManager cm = new CollisionManager((a, b, c) -> calls.incrementAndGet());
+
+        CircleBox circle = new CircleBox(0f, 0f, 20f);
+        Box rect = new Box(35f, 35f, 20f, 20f, true);
+
+        cm.addCollidable(circle);
+        cm.addCollidable(rect);
+        cm.update();
+
+        require(calls.get() == 0,
+            "Separated circle and rectangle should not collide");
+    }
+
+    private static void testCircleRectOverlapDetected() {
+        AtomicInteger calls = new AtomicInteger(0);
+        CollisionManager cm = new CollisionManager((a, b, c) -> calls.incrementAndGet());
+
+        CircleBox circle = new CircleBox(0f, 0f, 20f);
+        Box rect = new Box(30f, 0f, 20f, 20f, true);
+
+        cm.addCollidable(circle);
+        cm.addCollidable(rect);
+        cm.update();
+
+        require(calls.get() == 1,
+            "Overlapping circle and rectangle should collide");
+    }
+
     private static void require(boolean ok, String msg) {
         if (!ok) throw new IllegalStateException(msg);
     }
@@ -159,14 +192,14 @@ public final class EngineRegressionSelfTest {
             this.isStatic = isStatic;
         }
 
-        @Override public Rectangle getBounds() { return bounds; }
+        @Override public CollisionShape getCollisionShape() { return CollisionShape.rectangle(bounds); }
         @Override public void onCollision(Collidable other) {}
         @Override public boolean isStaticBody() { return isStatic; }
         @Override public int getCollisionLayer() { return 1; }
         @Override public int getCollisionMask() { return 1; }
     }
 
-    private static final class EntityBox extends Entity implements Collidable {
+    private static final class EntityBox extends Entity implements PhysicalBody {
         private final Rectangle bounds;
         private final boolean isStatic;
         private final float width;
@@ -186,10 +219,14 @@ public final class EngineRegressionSelfTest {
             bounds.setPosition(x, y);
         }
 
-        @Override
         public Rectangle getBounds() {
             bounds.setPosition(getPositionX(), getPositionY());
             return bounds;
+        }
+
+        @Override
+        public CollisionShape getCollisionShape() {
+            return CollisionShape.rectangle(getBounds());
         }
 
         @Override public void onCollision(Collidable other) {}
@@ -198,7 +235,6 @@ public final class EngineRegressionSelfTest {
         @Override public int getCollisionMask() { return 1; }
 
         @Override public void update(float deltaTime) {}
-        @Override public com.badlogic.gdx.graphics.g2d.TextureRegion getTexture() { return null; }
         @Override public float getWidth() { return width; }
         @Override public float getHeight() { return height; }
     }
@@ -216,7 +252,7 @@ public final class EngineRegressionSelfTest {
             this.isStatic = isStatic;
         }
 
-        @Override public Rectangle getBounds() { return bounds; }
+        @Override public CollisionShape getCollisionShape() { return CollisionShape.rectangle(bounds); }
         @Override public void onCollision(Collidable other) {}
         @Override public int getCollisionLayer() { return layer; }
         @Override public int getCollisionMask() { return mask; }
@@ -243,8 +279,8 @@ public final class EngineRegressionSelfTest {
         }
 
         @Override
-        public Rectangle getBounds() {
-            return bounds;
+        public CollisionShape getCollisionShape() {
+            return CollisionShape.rectangle(bounds);
         }
 
         @Override
@@ -259,8 +295,8 @@ public final class EngineRegressionSelfTest {
         }
 
         private boolean isSideContact(Collidable wallLike) {
-            Rectangle e = getBounds();
-            Rectangle w = wallLike.getBounds();
+            Rectangle e = getBroadPhaseBounds();
+            Rectangle w = wallLike.getBroadPhaseBounds();
             if (e == null || w == null) return false;
 
             float distToLeftFace = Math.abs((e.x + e.width) - w.x);
@@ -274,8 +310,8 @@ public final class EngineRegressionSelfTest {
         }
 
         private boolean isMovingTowardWall(Collidable wallLike) {
-            Rectangle e = getBounds();
-            Rectangle w = wallLike.getBounds();
+            Rectangle e = getBroadPhaseBounds();
+            Rectangle w = wallLike.getBroadPhaseBounds();
             if (e == null || w == null) return false;
 
             float eCx = e.x + e.width * 0.5f;
@@ -296,11 +332,6 @@ public final class EngineRegressionSelfTest {
         @Override
         public CollisionShape getCollisionShape() {
             return CollisionShape.circle(x + radius, y + radius, radius);
-        }
-
-        @Override
-        public Rectangle getBounds() {
-            return new Rectangle(x, y, radius * 2, radius * 2);
         }
 
         @Override public void onCollision(Collidable other) {}

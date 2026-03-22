@@ -3,12 +3,12 @@ package io.github.some_example_name.engine.collision;
 import com.badlogic.gdx.math.Rectangle;
 
 public interface Collidable {
-    Rectangle getBounds();
+    CollisionShape getCollisionShape();
     void onCollision(Collidable other);
-
-    /** Override this to use a non-rectangular collision shape. */
-    default CollisionShape getCollisionShape() {
-        return CollisionShape.rectangle(getBounds());
+    
+    default Rectangle getBroadPhaseBounds() {
+        CollisionShape shape = getCollisionShape();
+        return shape != null ? shape.getBounds() : null;
     }
 
     default int getCollisionLayer() { 

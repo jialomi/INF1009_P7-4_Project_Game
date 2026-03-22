@@ -1,5 +1,6 @@
 # Gradle local cache
 .gradle/
+.gradle-user/
 
 # Build outputs (all modules)
 **/build/

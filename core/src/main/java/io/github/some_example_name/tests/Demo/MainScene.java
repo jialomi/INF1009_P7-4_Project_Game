@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import io.github.some_example_name.engine.entity.Entity;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -40,7 +40,8 @@ public class MainScene extends AbstractScene {
     private float waveTimer;
     private static final float WAVE_INTERVAL = 12f;
 
-    public MainScene(SceneManager sceneManager) {
+    public MainScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }
@@ -65,8 +66,10 @@ public class MainScene extends AbstractScene {
         createEntity(new Wall(200, 300, 64));
         createEntity(new Wall(550, 400, 64));
 
-        player = new Player("Hero", 400, 100);
-        OutputManager output = IOManager.getInstance().getOutputManager();
+        player = new Player(getServices().getInput(), "Hero", 400, 100);
+        OutputManager output = getServices().getOutputManager();
+        output.clearCameraBounds();
+        output.setCameraBounds(0f, 0f, output.getWorldWidth(), output.getWorldHeight());
         createSideBoundaryWalls(output);
         // Keep player within side walls
         player.setMovementBounds(
@@ -93,7 +96,7 @@ public class MainScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.P)) {
+        if (getServices().getInput().isKeyJustPressed(Input.Keys.P)) {
             sceneManager.setActive("pause");
             return;
         }
@@ -129,8 +132,8 @@ public class MainScene extends AbstractScene {
             return;
         }
 
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.SPACE)) {
-            IOManager.getInstance().getAudio().playSound("test.mp3");
+        if (getServices().getInput().isKeyJustPressed(Input.Keys.SPACE)) {
+            getServices().getAudio().playSound("test.mp3");
         }
     }
 
@@ -163,9 +166,9 @@ public class MainScene extends AbstractScene {
 
     private boolean overlapsWallAt(float x, float y, float w, float h) {
         Rectangle candidate = new Rectangle(x, y, w, h);
-        for (Entity e : getEntities()) {
+        for (Entity e : getEntitiesInBounds(candidate)) {
             if ((e instanceof Wall || e instanceof BoundaryWall) && e instanceof Collidable) {
-                Rectangle b = ((Collidable) e).getBounds();
+                Rectangle b = ((Collidable) e).getBroadPhaseBounds();
                 if (b != null && candidate.overlaps(b)) return true;
             }
         }
@@ -173,19 +176,19 @@ public class MainScene extends AbstractScene {
     }
 
     private void spawnEnemySafely(String name, float y) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+        OutputManager output = getServices().getOutputManager();
         final int MAX_ATTEMPTS = 10;
 
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
             float x = randomEnemySpawnX(output);
             if (!overlapsWallAt(x, y, ENEMY_WIDTH, ENEMY_WIDTH)) {
-                createEntity(new Enemy(name, x, y));
+                createEntity(new Enemy(getServices().getAudio(), name, x, y));
                 return;
             }
         }
 
         float fallbackX = (output.getWorldWidth() - ENEMY_WIDTH) * 0.5f;
-        createEntity(new Enemy(name, fallbackX, y));
+        createEntity(new Enemy(getServices().getAudio(), name, fallbackX, y));
     }
 
 
@@ -198,15 +201,22 @@ public class MainScene extends AbstractScene {
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
+        output.updateCamera(
+            player.getInterpolatedPositionX(interpolationAlpha) + player.getWidth() * 0.5f,
+            player.getInterpolatedPositionY(interpolationAlpha) + player.getHeight() * 0.5f
+        );
+        output.beginWorld();
 
         for (Entity entity : getEntities()) {
-            output.drawEntity(entity);
+            output.drawEntity(entity, interpolationAlpha);
         }
+        output.endWorld();
 
-        float top = output.getWorldHeight() - 15f;
+        output.beginUi();
+        float top = output.getUiHeight() - 15f;
         font.draw(output.getBatch(), "LIVES: " + lives, 20, top);
         font.draw(output.getBatch(), "SCORE: " + score, 20, top - 24f);
         font.draw(output.getBatch(),
@@ -217,6 +227,7 @@ public class MainScene extends AbstractScene {
             font.draw(output.getBatch(), "HIT COOLING...", 20, top - 96f);
         }
 
+        output.endUi();
         output.endFrame();
     }
 

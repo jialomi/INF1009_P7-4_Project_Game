@@ -14,23 +14,37 @@ import io.github.some_example_name.engine.util.Validation;
  */
 
 public final class SceneManager {
+    public static final float DEFAULT_FIXED_STEP_SECONDS = 1f / 60f;
+    public static final int DEFAULT_MAX_STEPS_PER_FRAME = 5;
 
     private final Map<String, EngineScreen> scenes;
     private final Set<EngineScreen> initialisedScenes;
+    private final float fixedStepSeconds;
+    private final int maxStepsPerFrame;
 
     private EngineScreen active;
     private String activeName;
     private static final Runnable NO_OP = () -> {};
     private Runnable onSceneActivated = NO_OP;
 
-    // For fixed-step updates, we would accumulate delta and run multiple updates if needed:
-    private static final float FIXED_STEP = 1f / 60f;
-    private static final int MAX_STEPS_PER_FRAME = 5;
     private float accumulator = 0f;
+    private float interpolationAlpha = 1f;
 
     public SceneManager() {
+        this(DEFAULT_FIXED_STEP_SECONDS, DEFAULT_MAX_STEPS_PER_FRAME);
+    }
+
+    public SceneManager(float fixedStepSeconds, int maxStepsPerFrame) {
+        if (Float.isNaN(fixedStepSeconds) || Float.isInfinite(fixedStepSeconds) || fixedStepSeconds <= 0f) {
+            throw new IllegalArgumentException("fixedStepSeconds must be finite and > 0.");
+        }
+        if (maxStepsPerFrame < 1) {
+            throw new IllegalArgumentException("maxStepsPerFrame must be >= 1.");
+        }
         this.scenes = new ConcurrentHashMap<>();
         this.initialisedScenes = Collections.newSetFromMap(new IdentityHashMap<>());
+        this.fixedStepSeconds = fixedStepSeconds;
+        this.maxStepsPerFrame = maxStepsPerFrame;
     }
 
     public synchronized void load(String name, EngineScreen scene) {
@@ -120,11 +134,11 @@ public final class SceneManager {
         }
     }
 
-    public void render(float delta) {
+    public void render(float delta, float interpolationAlpha) {
         Validation.requireValidDelta(delta);
         EngineScreen current = active;
         if (current != null) {
-            current.render(delta);
+            current.render(delta, interpolationAlpha);
         }
     }
 
@@ -135,13 +149,14 @@ public final class SceneManager {
         accumulator += clamped;
 
         int steps = 0;
-        while (accumulator >= FIXED_STEP && steps < MAX_STEPS_PER_FRAME) {
-            update(FIXED_STEP);
-            accumulator -= FIXED_STEP;
+        while (accumulator >= fixedStepSeconds && steps < maxStepsPerFrame) {
+            update(fixedStepSeconds);
+            accumulator -= fixedStepSeconds;
             steps++;
         }
 
-        render(clamped);
+        interpolationAlpha = Math.max(0f, Math.min(1f, accumulator / fixedStepSeconds));
+        render(clamped, interpolationAlpha);
     }
 
     public void resize(int width, int height) {
@@ -170,5 +185,17 @@ public final class SceneManager {
             scene.initialise();
             initialisedScenes.add(scene);
         }
+    }
+
+    public float getInterpolationAlpha() {
+        return interpolationAlpha;
+    }
+
+    public float getFixedStepSeconds() {
+        return fixedStepSeconds;
+    }
+
+    public int getMaxStepsPerFrame() {
+        return maxStepsPerFrame;
     }
 }

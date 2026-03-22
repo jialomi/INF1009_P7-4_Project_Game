@@ -10,8 +10,8 @@ public class MovementCalculation {
     //Entity Center Calculation
     public Vector2 getEntityCenter(Entity entity) {
         requireEntity(entity, "entity");
-        float centerX = entity.getPosition().x + entity.getWidth() / 2;
-        float centerY = entity.getPosition().y + entity.getHeight() / 2;
+        float centerX = entity.getPositionX() + entity.getWidth() / 2;
+        float centerY = entity.getPositionY() + entity.getHeight() / 2;
         return new Vector2(centerX, centerY);
     }
     
@@ -36,8 +36,8 @@ public class MovementCalculation {
         Validation.requireValidDelta(deltaTime);
 
         entity.setPosition(
-            entity.getPosition().x + velocity.x * deltaTime,
-            entity.getPosition().y + velocity.y * deltaTime
+            entity.getPositionX() + velocity.x * deltaTime,
+            entity.getPositionY() + velocity.y * deltaTime
         );
     }
 

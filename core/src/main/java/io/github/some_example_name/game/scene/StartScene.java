@@ -4,7 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -16,7 +16,8 @@ public class StartScene extends AbstractScene {
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
 
-    public StartScene(SceneManager sceneManager) {
+    public StartScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
@@ -34,22 +35,24 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.ENTER)) {
-            SceneFlow.restartGame(sceneManager);
+        if (getServices().getInput().isKeyJustPressed(Input.Keys.ENTER)) {
+            SceneFlow.restartGame(sceneManager, getServices());
         }
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
+        output.beginUi();
 
-        float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, titleFont, "TUMOUR CELL SIMULATOR", cx, 420f);
-        drawCentered(output, bodyFont, "ENTER: START", cx, 340f);
-        drawCentered(output, bodyFont, "SURVIVE 45s TO WIN", cx, 305f);
-        drawCentered(output, bodyFont, "P: PAUSE", cx, 270f);
+        float cx = output.getUiWidth() / 2f;
+        drawCentered(output, titleFont, "TUMOUR CELL SIMULATOR", cx, output.getUiHeight() * 0.70f);
+        drawCentered(output, bodyFont, "ENTER: START", cx, output.getUiHeight() * 0.57f);
+        drawCentered(output, bodyFont, "SURVIVE 45s TO WIN", cx, output.getUiHeight() * 0.51f);
+        drawCentered(output, bodyFont, "P: PAUSE", cx, output.getUiHeight() * 0.45f);
 
+        output.endUi();
         output.endFrame();
     }
 

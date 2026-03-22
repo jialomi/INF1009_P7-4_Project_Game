@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -16,7 +16,8 @@ public class PauseScene extends AbstractScene {
     private final SceneManager sceneManager;
     private BitmapFont font;
 
-    public PauseScene(SceneManager sceneManager) {
+    public PauseScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) {
             throw new IllegalArgumentException("SceneManager cannot be null");
         }
@@ -32,13 +33,13 @@ public class PauseScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        DynamicInput input = IOManager.getInstance().getDynamicInput();
+        DynamicInput input = getServices().getInput();
 
         if (input.isKeyJustPressed(Input.Keys.P)) {
             sceneManager.setActive("main");
             return;
         } else if (input.isKeyJustPressed(Input.Keys.R)) {
-            SceneFlow.restartMainRun(sceneManager);
+            SceneFlow.restartMainRun(sceneManager, getServices());
             return;
         } else if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             SceneFlow.goToStart(sceneManager);
@@ -47,16 +48,18 @@ public class PauseScene extends AbstractScene {
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
+        output.beginUi();
 
-        float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, "PAUSED", cx, 360f);
-        drawCentered(output, "P: RESUME", cx, 300f);
-        drawCentered(output, "R: RESTART RUN", cx, 265f);
-        drawCentered(output, "ESC: BACK TO START", cx, 230f);
+        float cx = output.getUiWidth() / 2f;
+        drawCentered(output, "PAUSED", cx, output.getUiHeight() * 0.60f);
+        drawCentered(output, "P: RESUME", cx, output.getUiHeight() * 0.50f);
+        drawCentered(output, "R: RESTART RUN", cx, output.getUiHeight() * 0.44f);
+        drawCentered(output, "ESC: BACK TO START", cx, output.getUiHeight() * 0.38f);
 
+        output.endUi();
         output.endFrame();
     }
 

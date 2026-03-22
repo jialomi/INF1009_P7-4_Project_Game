@@ -1,10 +1,10 @@
 package io.github.some_example_name.game.entity;
 
-import io.github.some_example_name.engine.collision.Collidable;
+import io.github.some_example_name.engine.collision.PhysicalBody;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 import io.github.some_example_name.engine.collision.CollisionShape;
 
-public abstract class GameEntity extends RenderableEntity implements Collidable {
+public abstract class GameEntity extends RenderableEntity implements PhysicalBody {
   
   private float hp;
   private float maxHp;

@@ -4,10 +4,12 @@ import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.collision.CollisionManager;
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.entity.EntityManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.movement.MovementManager;
 import io.github.some_example_name.engine.util.Validation;
 
 import java.util.Collection;
+import com.badlogic.gdx.math.Rectangle;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,15 +23,21 @@ public abstract class AbstractScene implements EngineScreen{
     protected final EntityManager entityManager;
     protected final MovementManager movementManager;
     protected final CollisionManager collisionManager;
+    protected final EngineServices services;
 
     private final Set<Collidable> collidableRegistry;
     private boolean initialised;
     private boolean disposed;
 
     protected AbstractScene() {
+        this(null);
+    }
+
+    protected AbstractScene(EngineServices services) {
         this.entityManager = new EntityManager();
         this.movementManager = new MovementManager();
         this.collisionManager = new CollisionManager();
+        this.services = services;
         this.collidableRegistry = new HashSet<>();
         this.initialised = false;
         this.disposed = false;
@@ -80,6 +88,14 @@ public abstract class AbstractScene implements EngineScreen{
         return entityManager.getAll();
     }
 
+    public final Collection<Entity> getEntitiesInBounds(Rectangle area) {
+        return entityManager.getEntitiesInBounds(area);
+    }
+
+    public final Collection<Entity> getNearbyEntities(float centerX, float centerY, float radius) {
+        return entityManager.getNearbyEntities(centerX, centerY, radius);
+    }
+
     @Override
     public final void update(float delta) {
         ensureInitialised();
@@ -99,7 +115,7 @@ public abstract class AbstractScene implements EngineScreen{
     }
 
     @Override
-    public abstract void render(float delta);
+    public abstract void render(float delta, float interpolationAlpha);
 
     @Override
     public void resize(int width, int height) {
@@ -135,6 +151,13 @@ public abstract class AbstractScene implements EngineScreen{
         if (collidable != null && collidableRegistry.remove(collidable)) {
             collisionManager.removeCollidable(collidable);
         }
+    }
+
+    protected final EngineServices getServices() {
+        if (services == null) {
+            throw new IllegalStateException("Scene services are not available.");
+        }
+        return services;
     }
 
     private void ensureInitialised() {

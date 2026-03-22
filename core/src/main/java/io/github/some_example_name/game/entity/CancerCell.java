@@ -1,13 +1,14 @@
 package io.github.some_example_name.game.entity;
 
 import io.github.some_example_name.engine.collision.Collidable;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.DynamicInput;
 import io.github.some_example_name.engine.movement.MovementManager;
 import io.github.some_example_name.game.movement.PlayerMovement;
 
 public class CancerCell extends GameEntity {
   
   private final HealthBar healthBar;
+  private final DynamicInput input;
   private final PlayerMovement playerMovement;
 
   private static final float STARTING_SIZE = 40f;
@@ -17,9 +18,13 @@ public class CancerCell extends GameEntity {
   private float expToNextLevel = EXP_PER_LEVEL;
   private int level = 1;
 
-  public CancerCell(float x, float y) {
+  public CancerCell(DynamicInput input, float x, float y) {
     super(x, y, STARTING_SIZE);
+    if (input == null) {
+      throw new IllegalArgumentException("DynamicInput cannot be null");
+    }
     applySize(STARTING_SIZE);
+    this.input = input;
     this.healthBar = new HealthBar(this, STARTING_SIZE, 5f, 4f);
     this.playerMovement = new PlayerMovement(new MovementManager());
     this.texture = TextureFactory.createPlayerTexture(); // Placehholder texture!
@@ -35,12 +40,12 @@ public class CancerCell extends GameEntity {
 
     // normal move
     playerMovement.movePlayer(this, 200f, deltaTime,
-        key -> IOManager.getInstance().getDynamicInput().isKeyPressed(key));
+        key -> input.isKeyPressed(key));
 
     // dash on shift
-    if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(com.badlogic.gdx.Input.Keys.SHIFT_LEFT)) {
+    if (input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SHIFT_LEFT)) {
         playerMovement.dashPlayer(this, 200f, deltaTime,
-            key -> IOManager.getInstance().getDynamicInput().isKeyPressed(key));
+            key -> input.isKeyPressed(key));
     }
     
     // Keep within boundary

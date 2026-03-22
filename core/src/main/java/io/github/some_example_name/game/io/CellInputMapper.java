@@ -5,10 +5,17 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.UUID;
 
 import io.github.some_example_name.engine.io.DynamicInput;
-import io.github.some_example_name.engine.io.IOManager;
 
 public class CellInputMapper {
     private UUID activeCellId;
+    private final DynamicInput input;
+
+    public CellInputMapper(DynamicInput input) {
+        if (input == null) {
+            throw new IllegalArgumentException("DynamicInput cannot be null");
+        }
+        this.input = input;
+    }
 
     public void setActiveCellId(UUID id) {
         this.activeCellId = id;
@@ -20,10 +27,6 @@ public class CellInputMapper {
 
     public Vector2 processMovementInput() {
         Vector2 movement = new Vector2(0, 0);
-        DynamicInput input = IOManager.getInstance().getDynamicInput();
-
-        if (input == null)
-            return movement;
 
         if (input.isKeyPressed(Input.Keys.W) || input.isKeyPressed(Input.Keys.UP)) {
             movement.y += 1;
@@ -46,20 +49,19 @@ public class CellInputMapper {
     }
 
     public boolean checkSplitAction() {
-        return IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.SPACE);
+        return input.isKeyJustPressed(Input.Keys.SPACE);
     }
 
     public boolean checkSwapAction() {
-        return IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.TAB);
+        return input.isKeyJustPressed(Input.Keys.TAB);
     }
 
     public boolean checkPauseAction() {
-        DynamicInput input = IOManager.getInstance().getDynamicInput();
         return input.isKeyJustPressed(Input.Keys.P) || input.isKeyJustPressed(Input.Keys.ESCAPE);
     }
 
     public Vector2 getMouseSelection() {
         // relies on OutputManager to unproject the coordinates behind the scenes
-        return IOManager.getInstance().getDynamicInput().getMousePosition();
+        return input.getMousePosition();
     }
 }

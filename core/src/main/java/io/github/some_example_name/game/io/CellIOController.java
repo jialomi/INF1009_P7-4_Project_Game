@@ -1,6 +1,7 @@
 package io.github.some_example_name.game.io;
 
 import com.badlogic.gdx.math.Vector2;
+import io.github.some_example_name.engine.io.EngineServices;
 
 /**
  * main facade that game's OrganScene talks to
@@ -14,11 +15,14 @@ public class CellIOController {
     private CellUIRenderer uiRenderer;
     private WebIntegrationService webService;
 
-    public CellIOController() {
-        this.inputMapper = new CellInputMapper();
+    public CellIOController(EngineServices services) {
+        if (services == null) {
+            throw new IllegalArgumentException("EngineServices cannot be null");
+        }
+        this.inputMapper = new CellInputMapper(services.getInput());
         this.dataManager = new CellDataManager();
-        this.audioHandler = new CellAudioHandler();
-        this.uiRenderer = new CellUIRenderer();
+        this.audioHandler = new CellAudioHandler(services.getAudio());
+        this.uiRenderer = new CellUIRenderer(services.getOutputManager());
         this.webService = new WebIntegrationService();
     }
 

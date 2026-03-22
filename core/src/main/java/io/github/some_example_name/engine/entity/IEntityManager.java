@@ -1,5 +1,6 @@
 package io.github.some_example_name.engine.entity;
 
+import com.badlogic.gdx.math.Rectangle;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -60,6 +61,10 @@ public interface IEntityManager {
      * @return Unmodifiable collection of all entities
    */
   Collection<Entity> getAll();
+
+  Collection<Entity> getEntitiesInBounds(Rectangle area);
+
+  Collection<Entity> getNearbyEntities(float centerX, float centerY, float radius);
 
   /**
    * Returns the number of entities currently managed

@@ -1,52 +1,51 @@
 package io.github.some_example_name.engine.movement;
 
 import com.badlogic.gdx.math.Vector2;
-import java.util.function.IntPredicate;
 
 import io.github.some_example_name.engine.entity.Entity;
+import io.github.some_example_name.engine.util.Validation;
 
 public class MovementManager {
     
-    private PlayerMovementController playerController;
-    private NpcMovementController npcController;
-    private MovementCalculation helper;
-    
+    private final MovementCalculation helper;
+
     public MovementManager() {
-        this.playerController = new PlayerMovementController();
-        this.npcController = new NpcMovementController();
         this.helper = new MovementCalculation();
     }
-    
-    // Player Movement - Main method
-    public void handlePlayerMovement(Entity entity, float speed, float deltaTime, IntPredicate isPressed) {
-        playerController.handleMovement(entity, speed, deltaTime, isPressed);
+
+    public void moveByDirection(Entity entity, Vector2 direction, float speed, float deltaTime) {
+        if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
+        if (direction == null) throw new IllegalArgumentException("Direction cannot be null");
+        if (speed < 0f) throw new IllegalArgumentException("Speed cannot be negative.");
+        Validation.requireValidDelta(deltaTime);
+
+        if (direction.len2() == 0f) {
+            return;
+        }
+
+        Vector2 normalized = new Vector2(direction).nor().scl(speed * deltaTime);
+        entity.setPosition(
+            entity.getPositionX() + normalized.x,
+            entity.getPositionY() + normalized.y
+        );
     }
 
-    // Player Movement - Backward-compatible path
-    public void handlePlayerMovement(Entity entity, float speed, float deltaTime) {
-        playerController.handleMovement(entity, speed, deltaTime);
+    public void applyVelocity(Entity entity, Vector2 velocity, float deltaTime) {
+        helper.applyVelocity(entity, velocity, deltaTime);
+    }
+
+    public void translate(Entity entity, Vector2 delta) {
+        if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
+        if (delta == null) throw new IllegalArgumentException("Delta cannot be null");
+        entity.setPosition(entity.getPositionX() + delta.x, entity.getPositionY() + delta.y);
     }
     
-    // Npc Movement
-    public void moveNpc(Entity entity, com.badlogic.gdx.math.Vector2 velocity, float deltaTime) {
-        npcController.moveEntity(entity, velocity, deltaTime);
-    }
-    
-    // Helper Methods
     public Vector2 getEntityCenter(Entity entity) {
         return helper.getEntityCenter(entity);
     }
+
     public float getDistanceBetween(Entity a, Entity b) {
         return helper.getDistanceBetween(a, b);
-    }
-
-    // Getters
-    public PlayerMovementController getPlayerController() {
-        return playerController;
-    }
-
-    public NpcMovementController getNpcController() {
-        return npcController;
     }
     
     public MovementCalculation getHelper() {

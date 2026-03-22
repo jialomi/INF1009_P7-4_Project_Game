@@ -16,8 +16,7 @@ public class NpcBehaviour {
         Vector2 direction = new Vector2(to.x - from.x, to.y - from.y);
         if (direction.len2() == 0f) return; 
 
-        direction.nor().scl(speed);
-        mm.moveNpc(npc, direction, deltaTime);
+        mm.moveByDirection(npc, direction, speed, deltaTime);
     }
 
     // Flee behaviour
@@ -28,14 +27,13 @@ public class NpcBehaviour {
         Vector2 direction = new Vector2(from.x - threatPos.x, from.y - threatPos.y); // flipped vs chase
         if (direction.len2() == 0f) return;
 
-        direction.nor().scl(speed);
-        mm.moveNpc(npc, direction, deltaTime);
+        mm.moveByDirection(npc, direction, speed, deltaTime);
     }
 
     // Wander behaviour
     public static void wander(Entity npc, Vector2 direction, float speed, float deltaTime, MovementManager mm) {
         if (direction.len2() == 0f) return;
-        mm.moveNpc(npc, new Vector2(direction).scl(speed), deltaTime);
+        mm.moveByDirection(npc, direction, speed, deltaTime);
     }
 
     public static Vector2 updateWanderDirection(Vector2 current, float timer, float interval) {

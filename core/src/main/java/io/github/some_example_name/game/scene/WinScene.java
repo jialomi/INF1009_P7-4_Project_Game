@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import io.github.some_example_name.engine.io.DynamicInput;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -17,7 +17,8 @@ public class WinScene extends AbstractScene {
     private final SceneManager sceneManager;
     private BitmapFont font;
 
-    public WinScene(SceneManager sceneManager) {
+    public WinScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
@@ -31,24 +32,26 @@ public class WinScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        DynamicInput input = IOManager.getInstance().getDynamicInput();
+        DynamicInput input = getServices().getInput();
         if (input.isKeyJustPressed(Input.Keys.R)) {
-            SceneFlow.restartGame(sceneManager);
+            SceneFlow.restartGame(sceneManager, getServices());
         } else if (input.isKeyJustPressed(Input.Keys.ENTER)) {
             SceneFlow.goToStart(sceneManager);
         }
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
-        float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, "YOU WIN!", cx, 370f);
-        drawCentered(output, "SCORE: " + RunStats.getLastScore(), cx, 320f);
-        drawCentered(output, "SURVIVED: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, 285f);
-        drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, 250f);
-        drawCentered(output, "R: RESTART   ENTER: MENU", cx, 200f);
+        output.beginUi();
+        float cx = output.getUiWidth() / 2f;
+        drawCentered(output, "YOU WIN!", cx, output.getUiHeight() * 0.62f);
+        drawCentered(output, "SCORE: " + RunStats.getLastScore(), cx, output.getUiHeight() * 0.53f);
+        drawCentered(output, "SURVIVED: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, output.getUiHeight() * 0.47f);
+        drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, output.getUiHeight() * 0.41f);
+        drawCentered(output, "R: RESTART   ENTER: MENU", cx, output.getUiHeight() * 0.33f);
+        output.endUi();
         output.endFrame();
     }
 

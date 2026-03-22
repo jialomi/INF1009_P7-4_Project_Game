@@ -1,10 +1,10 @@
 package io.github.some_example_name.tests.Demo;
 
-import io.github.some_example_name.engine.collision.Collidable;
+import io.github.some_example_name.engine.collision.CollisionShape;
+import io.github.some_example_name.engine.collision.PhysicalBody;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 
-// === ISP FIX: Explicitly implements Collidable ===
-public class Wall extends RenderableEntity implements Collidable {
+public class Wall extends RenderableEntity implements PhysicalBody {
 
     public Wall(float x, float y, float size) {
         super(x, y, size, size);
@@ -19,7 +19,7 @@ public class Wall extends RenderableEntity implements Collidable {
     }
 
     @Override
-    public void onCollision(Collidable other) {
+    public void onCollision(io.github.some_example_name.engine.collision.Collidable other) {
         // Walls don't react
     }
 
@@ -33,6 +33,11 @@ public class Wall extends RenderableEntity implements Collidable {
 
     @Override
     public int getCollisionMask() { return (1 << 1) | (1 << 2); } // Collides with players and enemies, but not other walls
+
+    @Override
+    public CollisionShape getCollisionShape() {
+        return CollisionShape.rectangle(getBounds());
+    }
     
     public void dispose() {
         // no-op: textures are shared and owned by DemoTextureFactory

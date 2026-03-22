@@ -19,14 +19,14 @@ public class PlayerMovement {
 
     // Basic movement
     public void movePlayer(Entity player, float speed, float delta, IntPredicate isPressed) {
-        movementManager.handlePlayerMovement(player, speed, delta, isPressed);
+        movementManager.moveByDirection(player, gatherDirection(isPressed), speed, delta);
     }
 
     // Dash movement
     public void dashPlayer(Entity player, float speed, float delta, IntPredicate isPressed) {
         isDashing = true;
         dashTimer = DASH_DURATION;
-        movementManager.handlePlayerMovement(player, speed * DASH_MULTIPLIER, delta, isPressed);
+        movementManager.moveByDirection(player, gatherDirection(isPressed), speed * DASH_MULTIPLIER, delta);
     }
 
     public void update(float delta) {
@@ -37,4 +37,13 @@ public class PlayerMovement {
     }
 
     public boolean isDashing() { return isDashing; }
+
+    private com.badlogic.gdx.math.Vector2 gatherDirection(IntPredicate isPressed) {
+        com.badlogic.gdx.math.Vector2 direction = new com.badlogic.gdx.math.Vector2();
+        if (isPressed.test(com.badlogic.gdx.Input.Keys.W) || isPressed.test(com.badlogic.gdx.Input.Keys.UP)) direction.y += 1f;
+        if (isPressed.test(com.badlogic.gdx.Input.Keys.S) || isPressed.test(com.badlogic.gdx.Input.Keys.DOWN)) direction.y -= 1f;
+        if (isPressed.test(com.badlogic.gdx.Input.Keys.A) || isPressed.test(com.badlogic.gdx.Input.Keys.LEFT)) direction.x -= 1f;
+        if (isPressed.test(com.badlogic.gdx.Input.Keys.D) || isPressed.test(com.badlogic.gdx.Input.Keys.RIGHT)) direction.x += 1f;
+        return direction;
+    }
 }

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import io.github.some_example_name.engine.entity.Entity;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -39,7 +39,8 @@ public class GameScene extends AbstractScene {
     private int wave;
     private float waveTimer;
 
-    public GameScene(SceneManager sceneManager) {
+    public GameScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
@@ -59,7 +60,7 @@ public class GameScene extends AbstractScene {
         wave = 1;
         waveTimer = 0f;
 
-        player = new CancerCell(400f, 100f);
+        player = new CancerCell(getServices().getInput(), 400f, 100f);
         createEntity(player);
 
         // spawn T-cells
@@ -69,7 +70,7 @@ public class GameScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (IOManager.getInstance().getDynamicInput().isKeyJustPressed(Input.Keys.P)) {
+        if (getServices().getInput().isKeyJustPressed(Input.Keys.P)) {
             sceneManager.setActive("pause");
             return;
         }
@@ -130,20 +131,24 @@ public class GameScene extends AbstractScene {
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
+        output.beginWorld();
 
         for (Entity entity : getEntities()) {
-            output.drawEntity(entity);
+            output.drawEntity(entity, interpolationAlpha);
         }
+        output.endWorld();
 
-        float top = output.getWorldHeight() - 15f;
+        output.beginUi();
+        float top = output.getUiHeight() - 15f;
         font.draw(output.getBatch(), "LIVES: " + lives, 20, top);
         font.draw(output.getBatch(), "SCORE: " + score, 20, top - 24f);
         font.draw(output.getBatch(),
             "TIME: " + String.format(Locale.US, "%.1f / %.0fs", elapsed, WIN_TIME_SECONDS), 20, top - 48f);
         font.draw(output.getBatch(), "P: PAUSE", 20, top - 72f);
+        output.endUi();
 
         output.endFrame();
     }

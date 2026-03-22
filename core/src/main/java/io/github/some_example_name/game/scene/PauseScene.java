@@ -5,11 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import io.github.some_example_name.engine.io.DynamicInput;
-import io.github.some_example_name.engine.io.IOManager;
+import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
-import io.github.some_example_name.game.util.RunStats;
 import io.github.some_example_name.game.util.SceneFlow;
 
 public class PauseScene extends AbstractScene {
@@ -17,7 +16,8 @@ public class PauseScene extends AbstractScene {
     private final SceneManager sceneManager;
     private BitmapFont font;
 
-    public PauseScene(SceneManager sceneManager) {
+    public PauseScene(SceneManager sceneManager, EngineServices services) {
+        super(services);
         if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
@@ -31,25 +31,27 @@ public class PauseScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        DynamicInput input = IOManager.getInstance().getDynamicInput();
+        DynamicInput input = getServices().getInput();
         if (input.isKeyJustPressed(Input.Keys.P)) {
             sceneManager.setActive("game");
         } else if (input.isKeyJustPressed(Input.Keys.R)) {
-            SceneFlow.restartGame(sceneManager);
+            SceneFlow.restartGame(sceneManager, getServices());
         } else if (input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             SceneFlow.goToStart(sceneManager);
         }
     }
 
     @Override
-    public void render(float delta) {
-        OutputManager output = IOManager.getInstance().getOutputManager();
+    public void render(float delta, float interpolationAlpha) {
+        OutputManager output = getServices().getOutputManager();
         output.beginFrame();
-        float cx = output.getWorldWidth() / 2f;
-        drawCentered(output, "PAUSED", cx, 360f);
-        drawCentered(output, "P: RESUME", cx, 300f);
-        drawCentered(output, "R: RESTART", cx, 265f);
-        drawCentered(output, "ESC: START MENU", cx, 230f);
+        output.beginUi();
+        float cx = output.getUiWidth() / 2f;
+        drawCentered(output, "PAUSED", cx, output.getUiHeight() * 0.60f);
+        drawCentered(output, "P: RESUME", cx, output.getUiHeight() * 0.50f);
+        drawCentered(output, "R: RESTART", cx, output.getUiHeight() * 0.44f);
+        drawCentered(output, "ESC: START MENU", cx, output.getUiHeight() * 0.38f);
+        output.endUi();
         output.endFrame();
     }
 
