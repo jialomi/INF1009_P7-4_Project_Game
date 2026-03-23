@@ -1,6 +1,7 @@
 package io.github.some_example_name.game.io;
 
 import com.badlogic.gdx.math.Vector2;
+
 import io.github.some_example_name.engine.io.EngineServices;
 
 /**
@@ -16,16 +17,32 @@ public class CellIOController {
     private WebIntegrationService webService;
 
     public CellIOController(EngineServices services) {
-        if (services == null) {
-            throw new IllegalArgumentException("EngineServices cannot be null");
-        }
-        this.inputMapper = new CellInputMapper(services.getInput());
-        this.dataManager = new CellDataManager();
-        this.audioHandler = new CellAudioHandler(services.getAudio());
-        this.uiRenderer = new CellUIRenderer(services.getOutputManager());
-        this.webService = new WebIntegrationService();
+    if (services == null) {
+        throw new IllegalArgumentException("EngineServices cannot be null");
+    }
+    this.inputMapper = new CellInputMapper(services.getInput());
+    this.dataManager = new CellDataManager();
+    this.audioHandler = new CellAudioHandler(services.getAudio());
+    this.uiRenderer = new CellUIRenderer(services.getOutputManager());
+    this.webService = new WebIntegrationService();
+
+    // ADD THIS LINE TO START THE MUSIC IMMEDIATELY
+    this.audioHandler.setOrganBGM("lungs"); 
     }
 
+    /**
+     * MUST be called once when the organ level finishes loading.
+     * Sets up initial audio and state visuals.
+     */
+    public void onLevelStart(CellGameState gameState) {
+        // Automatically pull the organ name from the save/game state and play the right BGM
+        if (gameState != null && gameState.currentOrgan != null) {
+            audioHandler.setOrganBGM(gameState.currentOrgan);
+        } else {
+            // Fallback just in case
+            audioHandler.setOrganBGM("lungs_bgm.mp3");
+        }
+    }
     /**
      * called every frame by active scene to poll inputs
      */

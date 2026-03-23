@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
@@ -26,7 +27,7 @@ public class StartScene extends AbstractScene {
     protected void onInitialise() {
         titleFont = new BitmapFont();
         titleFont.getData().setScale(2.2f);
-        titleFont.setColor(Color.WHITE);
+        titleFont.setColor(new Color(0.8f, 0.2f, 0.9f, 1f));
 
         bodyFont = new BitmapFont();
         bodyFont.getData().setScale(1.2f);
@@ -46,11 +47,19 @@ public class StartScene extends AbstractScene {
         output.beginFrame();
         output.beginUi();
 
-        float cx = output.getUiWidth() / 2f;
-        drawCentered(output, titleFont, "TUMOUR CELL SIMULATOR", cx, output.getUiHeight() * 0.70f);
-        drawCentered(output, bodyFont, "ENTER: START", cx, output.getUiHeight() * 0.57f);
-        drawCentered(output, bodyFont, "SURVIVE 45s TO WIN", cx, output.getUiHeight() * 0.51f);
-        drawCentered(output, bodyFont, "P: PAUSE", cx, output.getUiHeight() * 0.45f);
+        float cx = output.getUiWidth()  / 2f;
+        float cy = output.getUiHeight() / 2f;
+
+        drawCentered(output, titleFont, "TUMOUR CELL",                              cx, cy + 140f);
+        drawCentered(output, titleFont, "SIMULATOR",                                cx, cy + 95f);
+        drawCentered(output, bodyFont,  "- - - - - - - - - -",                      cx, cy + 55f);
+        drawCentered(output, bodyFont,  "You are a cancer cell.",                   cx, cy + 20f);
+        drawCentered(output, bodyFont,  "Infect the body.",                         cx, cy - 10f);
+        drawCentered(output, bodyFont,  "Avoid the T-Cells.",                       cx, cy - 40f);
+        drawCentered(output, bodyFont,  "Evolve. Spread. Survive.",                 cx, cy - 70f);
+        drawCentered(output, bodyFont,  "- - - - - - - - - -",                      cx, cy - 105f);
+        drawCentered(output, bodyFont,  "ENTER: BEGIN INFECTION",                   cx, cy - 135f);
+        drawCentered(output, bodyFont,  "ARROW KEYS: Move  SHIFT: Dash  P: Pause", cx, cy - 165f);
 
         output.endUi();
         output.endFrame();
@@ -64,6 +73,6 @@ public class StartScene extends AbstractScene {
     @Override
     protected void onDispose() {
         if (titleFont != null) titleFont.dispose();
-        if (bodyFont != null) bodyFont.dispose();
+        if (bodyFont  != null) bodyFont.dispose();
     }
 }

@@ -10,6 +10,7 @@ import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
+import io.github.some_example_name.game.io.WebIntegrationService; // <-- Added Import
 import io.github.some_example_name.game.util.RunStats;
 import io.github.some_example_name.game.util.SceneFlow;
 
@@ -17,6 +18,14 @@ public class WinScene extends AbstractScene {
 
     private final SceneManager sceneManager;
     private BitmapFont font;
+    private String headerText;
+
+    // The rotating phrases for when the tumor wins
+    private final String[] winPhrases = {
+        "The host fails.",
+        "All systems collapse.",
+        "There is nothing left to resist you."
+    };
 
     public WinScene(SceneManager sceneManager, EngineServices services) {
         super(services);
@@ -28,7 +37,10 @@ public class WinScene extends AbstractScene {
     protected void onInitialise() {
         font = new BitmapFont();
         font.getData().setScale(1.8f);
-        font.setColor(Color.LIME);
+        font.setColor(new Color(0.8f, 0.2f, 0.9f, 1f)); // purple for cancer win
+        
+        // Randomly select one phrase when the scene loads
+        headerText = winPhrases[(int)(Math.random() * winPhrases.length)];
     }
 
     @Override
@@ -38,6 +50,9 @@ public class WinScene extends AbstractScene {
             SceneFlow.restartGame(sceneManager, getServices());
         } else if (input.isKeyJustPressed(Input.Keys.ENTER)) {
             SceneFlow.goToStart(sceneManager);
+        } else if (input.isKeyJustPressed(Input.Keys.D)) {
+            // Trigger the browser link!
+            new WebIntegrationService().openDonationSiteInBrowser();
         }
     }
 
@@ -46,12 +61,20 @@ public class WinScene extends AbstractScene {
         OutputManager output = getServices().getOutputManager();
         output.beginFrame();
         output.beginUi();
-        float cx = output.getUiWidth() / 2f;
-        drawCentered(output, "YOU WIN!", cx, output.getUiHeight() * 0.62f);
-        drawCentered(output, "SCORE: " + RunStats.getLastScore(), cx, output.getUiHeight() * 0.53f);
-        drawCentered(output, "SURVIVED: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, output.getUiHeight() * 0.47f);
-        drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, output.getUiHeight() * 0.41f);
-        drawCentered(output, "R: RESTART   ENTER: MENU", cx, output.getUiHeight() * 0.33f);
+
+        float cx = output.getUiWidth()  / 2f;
+        float cy = output.getUiHeight() / 2f;
+
+        // Shifted the layout up slightly to center the new text block perfectly
+        drawCentered(output, headerText,                         cx, cy + 110f);
+        drawCentered(output, "- - - - - - - - - -",              cx, cy + 50f);
+        drawCentered(output, "CELLS EATEN: "  + RunStats.getLastScore(), cx, cy + 10f);
+        drawCentered(output, "TIME: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, cy - 25f);
+        drawCentered(output, "BEST: "   + RunStats.getBestScore(),       cx, cy - 60f);
+        drawCentered(output, "- - - - - - - - - -",              cx, cy - 100f);
+        drawCentered(output, "R: PLAY AGAIN   ENTER: MENU",      cx, cy - 140f);
+        drawCentered(output, "D: DONATE TO CANCER RESEARCH",     cx, cy - 180f); // New line!
+
         output.endUi();
         output.endFrame();
     }

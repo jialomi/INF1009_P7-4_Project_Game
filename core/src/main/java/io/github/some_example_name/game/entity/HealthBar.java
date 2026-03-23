@@ -20,15 +20,24 @@ public class HealthBar {
   public void render(ShapeRenderer shapeRenderer) {
     float percentage = getPercentage();
 
-    float x = owner.getPositionX();
+    // Perfectly center the health bar based on current growing size!
+    float centerX = owner.getPositionX() + (owner.getWidth() / 2f);
+    float x = centerX - (barWidth / 2f);
     float y = owner.getPositionY() + owner.getHeight() + yOffset;
 
-    // Background (red)
-    shapeRenderer.setColor(Color.RED);
+    // Background (Dark gray so it doesn't look like damage)
+    shapeRenderer.setColor(Color.DARK_GRAY);
     shapeRenderer.rect(x, y, barWidth, barHeight);
 
-    // Foreground (green fill based on remaining HP)
-    shapeRenderer.setColor(Color.GREEN);
+    // Foreground: Purple for Cancer, Orange for TCells, Green for Normal
+    if (owner instanceof CancerCell) {
+         shapeRenderer.setColor(new Color(0.8f, 0.2f, 0.8f, 1f)); 
+    } else if (owner instanceof TCell) {
+         shapeRenderer.setColor(Color.ORANGE);
+    } else {
+         shapeRenderer.setColor(Color.GREEN);
+    }
+    
     shapeRenderer.rect(x, y, barWidth * percentage, barHeight);
   }
 

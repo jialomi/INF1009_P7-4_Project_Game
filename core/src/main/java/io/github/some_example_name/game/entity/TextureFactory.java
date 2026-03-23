@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public final class TextureFactory {
-    private static TextureRegion player;
+     private static TextureRegion cancerCell; //player
     private static TextureRegion enemyRed;
     private static TextureRegion enemyYellow;
     private static final Map<Integer, TextureRegion> wallBySize = new HashMap<>();
@@ -20,34 +20,29 @@ public final class TextureFactory {
     private TextureFactory() {}
 
     public static TextureRegion createPlayerTexture() {
-        if (player == null) player = createSolidTexture(64, 64, Color.BLUE);
-        return player;
+    if (cancerCell == null) {
+        Texture sheet = new Texture("cancer_cell.png");
+        // TODO: replace 48, 48 with actual frame size from _SpriteSheetInfo.txt
+        cancerCell = new TextureRegion(sheet, 64, 144, 32, 72);
     }
+    return cancerCell;
+}
 
     public static TextureRegion createEnemyTexture(boolean isHit) {
-        if (isHit) {
-            if (enemyYellow == null) enemyYellow = createSolidTexture(48, 48, Color.YELLOW);
-            return enemyYellow;
-        }
-        if (enemyRed == null) enemyRed = createSolidTexture(48, 48, Color.RED);
-        return enemyRed;
-    }
+    if (enemyRed == null)
+        enemyRed = new TextureRegion(new Texture("Tcell.png"));
+    if (enemyYellow == null)
+        enemyYellow = new TextureRegion(new Texture("Tcell.png"));
+    return isHit ? enemyYellow : enemyRed;
+}
 
     public static TextureRegion createWallTexture(int size) {
-        TextureRegion cached = wallBySize.get(size);
-        if (cached != null) return cached;
-
-        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0, 0, 0, 0);
-        pixmap.fill();
-        pixmap.setColor(Color.PURPLE);
-        pixmap.fillCircle(size / 2, size / 2, size / 2);
-
-        TextureRegion region = new TextureRegion(new Texture(pixmap));
-        pixmap.dispose();
-        wallBySize.put(size, region);
-        return region;
-    }
+    TextureRegion cached = wallBySize.get(size);
+    if (cached != null) return cached;
+    TextureRegion region = new TextureRegion(new Texture("Normal_cell.png"));
+    wallBySize.put(size, region);
+    return region;
+}
 
     public static TextureRegion createBoundaryTexture(int width, int height) {
         String key = width + "x" + height;
@@ -70,13 +65,13 @@ public final class TextureFactory {
 
     public static void disposeAll() {
         Set<Texture> disposed = new HashSet<>();
-        disposeRegion(player, disposed);
+        disposeRegion(cancerCell, disposed);
         disposeRegion(enemyRed, disposed);
         disposeRegion(enemyYellow, disposed);
         for (TextureRegion r : wallBySize.values()) disposeRegion(r, disposed);
         for (TextureRegion r : boundaryBySize.values()) disposeRegion(r, disposed);
 
-        player = null;
+        cancerCell = null;
         enemyRed = null;
         enemyYellow = null;
         wallBySize.clear();

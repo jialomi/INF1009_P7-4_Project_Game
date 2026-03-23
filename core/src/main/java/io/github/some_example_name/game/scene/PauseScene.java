@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+
 import io.github.some_example_name.engine.io.DynamicInput;
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
@@ -43,17 +44,25 @@ public class PauseScene extends AbstractScene {
 
     @Override
     public void render(float delta, float interpolationAlpha) {
-        OutputManager output = getServices().getOutputManager();
-        output.beginFrame();
-        output.beginUi();
-        float cx = output.getUiWidth() / 2f;
-        drawCentered(output, "PAUSED", cx, output.getUiHeight() * 0.60f);
-        drawCentered(output, "P: RESUME", cx, output.getUiHeight() * 0.50f);
-        drawCentered(output, "R: RESTART", cx, output.getUiHeight() * 0.44f);
-        drawCentered(output, "ESC: START MENU", cx, output.getUiHeight() * 0.38f);
-        output.endUi();
-        output.endFrame();
-    }
+    OutputManager output = getServices().getOutputManager();
+    output.beginFrame();
+    output.beginUi();
+
+    float cx = output.getUiWidth()  / 2f;
+    float cy = output.getUiHeight() / 2f;
+
+    drawCentered(output, "PAUSED",              cx, cy + 100f);
+    drawCentered(output, "- - - - - - - - - -", cx, cy + 60f);
+    drawCentered(output, "P: RESUME",           cx, cy + 20f);
+    drawCentered(output, "R: RESTART",          cx, cy - 20f);
+    drawCentered(output, "ESC: MAIN MENU",      cx, cy - 60f);
+    drawCentered(output, "- - - - - - - - - -", cx, cy - 100f);
+    drawCentered(output, "ARROW KEYS: Move",    cx, cy - 135f);
+    drawCentered(output, "SHIFT: Dash",         cx, cy - 165f);
+
+    output.endUi();
+    output.endFrame();
+}
 
     private void drawCentered(OutputManager output, String text, float cx, float y) {
         GlyphLayout layout = new GlyphLayout(font, text);
