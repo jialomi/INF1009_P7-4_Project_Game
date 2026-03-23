@@ -2,7 +2,6 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputConfiguration;
 import io.github.some_example_name.engine.scene.SceneManager;
@@ -14,6 +13,10 @@ import io.github.some_example_name.game.entity.TextureFactory; // Placeholder te
 import io.github.some_example_name.game.scene.WinScene;
 
 public class GameMaster extends Game {
+    private static final float LOGIC_STEP_SECONDS = 1f / 60f;
+    private static final int MAX_LOGIC_STEPS_PER_FRAME = 5;
+
+    private EngineServices services;
     private static final float LOGIC_STEP_SECONDS = 1f / 60f;
     private static final int MAX_LOGIC_STEPS_PER_FRAME = 5;
 
@@ -58,6 +61,8 @@ public class GameMaster extends Game {
     public void resize(int width, int height) {
         if (services != null && services.getOutputManager() != null) {
             services.getOutputManager().resize(width, height);
+        if (services != null && services.getOutputManager() != null) {
+            services.getOutputManager().resize(width, height);
         }
         if (sceneManager != null) {
             sceneManager.resize(width, height);
@@ -67,6 +72,7 @@ public class GameMaster extends Game {
     @Override
     public void dispose() {
         if (sceneManager != null) sceneManager.dispose();
+        if (services != null) services.dispose();
         if (services != null) services.dispose();
         TextureFactory.disposeAll();
     }
