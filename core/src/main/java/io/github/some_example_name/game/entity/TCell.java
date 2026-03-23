@@ -19,17 +19,18 @@ public class TCell extends GameEntity {
     private static final float TCELL_SIZE      = 90f;
     private static final float WANDER_INTERVAL = 2f;
     private static final float CHASE_RANGE     = 3000f;
-    private static final float SPEED           = 80f;
+    private float speed;
 
     private Vector2 wanderDir   = new Vector2(1, 0);
     private float   wanderTimer = 0f;
     private CancerCell target;
 
-    public TCell(float x, float y) {
+    public TCell(float x, float y, float speed) {
         super(x, y, TCELL_SIZE);
         applySize(TCELL_SIZE);
         this.healthBar       = new HealthBar(this, TCELL_SIZE, 5f, 4f);
         this.movementManager = new MovementManager();
+        this.speed = speed;
 
         Texture sheet = new Texture("tcell_strip.png");
         TextureRegion[] frames = new TextureRegion[5];
@@ -54,9 +55,9 @@ public class TCell extends GameEntity {
         if (wanderTimer >= WANDER_INTERVAL) wanderTimer = 0f;
 
         if (target != null && movementManager.getDistanceBetween(this, target) < CHASE_RANGE) {
-            NpcBehaviour.chase(this, target, SPEED, deltaTime, movementManager);
+            NpcBehaviour.chase(this, target, speed, deltaTime, movementManager);
         } else {
-            NpcBehaviour.wander(this, wanderDir, SPEED, deltaTime, movementManager);
+            NpcBehaviour.wander(this, wanderDir, speed, deltaTime, movementManager);
         }
 
         // Clamps cells inside the massive 2000x2000 world, 

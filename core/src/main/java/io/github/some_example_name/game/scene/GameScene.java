@@ -292,6 +292,13 @@ public class GameScene extends AbstractScene {
 
     private void spawnNormalCellWave() {
         int amountToSpawn = 40; // Spawns a massive feast of 40 cells!
+        int wave = waveManager.getNormalCellWave();
+        
+        // Cell speed scales with each wave, but caps at 200f
+        float cellSpeed = Math.min(50f + (wave * 50f), 200f);
+        // Flee range scales
+        float fleeRange = 50f + (wave * 100f); 
+
         System.out.println("[Wave " + waveManager.getNormalCellWave()
             + "] Spawning " + amountToSpawn + " normal cells.");
             
@@ -302,7 +309,7 @@ public class GameScene extends AbstractScene {
             float x = randomWalkableX();
             float y = randomWalkableY();
             if (isWalkable(x, y)) {
-                NormalCell cell = CellFactory.createNormalCell(x, y);
+                NormalCell cell = CellFactory.createNormalCell(x, y, cellSpeed, fleeRange);
                 createEntity(cell);
                 cell.setThreat(player);
                 spawned++;
@@ -312,7 +319,9 @@ public class GameScene extends AbstractScene {
 
     private void spawnTCell(float x) {
         float y = 1900f; // Spawn near the top of the massive map
-        TCell tcell = CellFactory.createTCell(x, y);
+        int stage = cancerManager.getCurrentStage();
+        float tCellSpeed = Math.min(80f + (stage * 33f), 250f); 
+        TCell tcell = CellFactory.createTCell(x, y, tCellSpeed);
         createEntity(tcell);
         tcell.setTarget(player);
     }

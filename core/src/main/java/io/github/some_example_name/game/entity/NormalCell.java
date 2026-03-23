@@ -17,13 +17,15 @@ public class NormalCell extends GameEntity {
     private Vector2 wanderDir = new Vector2(0, -1);
     private float wanderTimer = 0f;
     private static final float WANDER_INTERVAL = 2f;
-    private static final float FLEE_RANGE      = 150f;
-    private static final float SPEED           = 60f;
+    private float fleeRange;
+    private float speed;
     private CancerCell threat;
 
-    public NormalCell(float x, float y) {
+    public NormalCell(float x, float y, float speed, float fleeRange) {
         super(x, y, NORMAL_SIZE);
         applySize(NORMAL_SIZE);
+        this.speed = speed;
+        this.fleeRange = fleeRange;
         this.healthBar     = new HealthBar(this, NORMAL_SIZE, 5f, 4f);
         this.movementManager = new MovementManager();
         this.texture = TextureFactory.createWallTexture((int) NORMAL_SIZE);
@@ -39,10 +41,10 @@ public class NormalCell extends GameEntity {
         wanderDir = NpcBehaviour.updateWanderDirection(wanderDir, wanderTimer, WANDER_INTERVAL);
         if (wanderTimer >= WANDER_INTERVAL) wanderTimer = 0f;
 
-        if (threat != null && movementManager.getDistanceBetween(this, threat) < FLEE_RANGE) {
-            NpcBehaviour.flee(this, threat, SPEED, deltaTime, movementManager);
+        if (threat != null && movementManager.getDistanceBetween(this, threat) < fleeRange) {
+            NpcBehaviour.flee(this, threat, speed, deltaTime, movementManager);
         } else {
-            NpcBehaviour.wander(this, wanderDir, SPEED, deltaTime, movementManager);
+            NpcBehaviour.wander(this, wanderDir, speed, deltaTime, movementManager);
         }
 
         // Clamps cells inside the massive 2000x2000 world, 

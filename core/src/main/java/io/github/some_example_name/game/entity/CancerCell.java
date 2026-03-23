@@ -47,12 +47,8 @@ public class CancerCell extends GameEntity {
         this.texture = walkAnimation.getKeyFrame(stateTime);
 
         playerMovement.update(deltaTime);
-        playerMovement.movePlayer(this, 200f, deltaTime,
-            key -> input.isKeyPressed(key));
-        if (input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.SHIFT_LEFT)) {
-            playerMovement.dashPlayer(this, 200f, deltaTime,
-                key -> input.isKeyPressed(key));
-        }
+        playerMovement.movePlayer(this, 200f, deltaTime, key -> input.isKeyPressed(key));
+
         float x = Math.max(64f, Math.min(getPositionX(), 2000f - 64f - getWidth()));
         float y = Math.max(64f, Math.min(getPositionY(), 2000f - 64f - getHeight()));
         setPosition(x, y);

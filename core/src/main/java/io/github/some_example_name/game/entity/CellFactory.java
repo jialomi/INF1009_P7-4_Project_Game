@@ -10,12 +10,12 @@ public class CellFactory {
   }
 
   // Creates an enemy NormalCell at the given position
-  public static NormalCell createNormalCell(float x, float y) {
-    return new NormalCell(x, y);
+  public static NormalCell createNormalCell(float x, float y, float speed, float fleeRange) {
+    return new NormalCell(x, y, speed, fleeRange);
   }
 
   // Create an enemy TCell at the given position
-  public static TCell createTCell(float x, float y) {
-    return new TCell(x, y);
+  public static TCell createTCell(float x, float y, float speed) {
+    return new TCell(x, y, speed);
   }
 }
