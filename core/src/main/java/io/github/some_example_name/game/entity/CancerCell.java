@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.movement.MovementManager;
 import io.github.some_example_name.game.movement.PlayerMovement;
-// import io.github.some_example_name.engine.io.DynamicInput;
 
 import io.github.some_example_name.game.io.CellIOController;
 import io.github.some_example_name.game.io.CellInputMapper;
