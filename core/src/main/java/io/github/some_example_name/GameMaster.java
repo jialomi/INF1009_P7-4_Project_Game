@@ -30,6 +30,9 @@ public class GameMaster extends Game {
         services.getAudio().preloadSound("crash.mp3");
         services.getAudio().preloadSound("test.mp3");
 
+        // init celliocontroller singleton instance
+        io.github.some_example_name.game.io.CellIOController.initialize(services);
+
         services.getOutputManager().resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         sceneManager = new SceneManager(LOGIC_STEP_SECONDS, MAX_LOGIC_STEPS_PER_FRAME);

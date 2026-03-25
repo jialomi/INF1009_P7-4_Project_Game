@@ -1,12 +1,10 @@
 package io.github.some_example_name.game.entity;
 
-import io.github.some_example_name.engine.io.DynamicInput;
-
 public class CellFactory {
-  
+
   // Creates a player-controlled CancerCell at the given position
-  public static CancerCell createCancerCell(DynamicInput input, float x, float y) {
-    return new CancerCell(input, x, y);
+  public static CancerCell createCancerCell(float x, float y) {
+    return new CancerCell(x, y);
   }
 
   // Creates an enemy NormalCell at the given position

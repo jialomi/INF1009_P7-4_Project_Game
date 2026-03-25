@@ -1,6 +1,6 @@
 package io.github.some_example_name.game.scene;
 
-import com.badlogic.gdx.Input;
+// import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -9,6 +9,8 @@ import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
+import io.github.some_example_name.game.io.CellIOController;
+import io.github.some_example_name.game.io.CellInputMapper;
 import io.github.some_example_name.game.util.SceneFlow;
 
 public class StartScene extends AbstractScene {
@@ -19,7 +21,8 @@ public class StartScene extends AbstractScene {
 
     public StartScene(SceneManager sceneManager, EngineServices services) {
         super(services);
-        if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
+        if (sceneManager == null)
+            throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
 
@@ -36,7 +39,7 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (getServices().getInput().isKeyJustPressed(Input.Keys.ENTER)) {
+        if (CellIOController.getInstance().getInputMapper().checkConfirmAction()) {
             SceneFlow.restartGame(sceneManager, getServices());
         }
     }
@@ -47,19 +50,19 @@ public class StartScene extends AbstractScene {
         output.beginFrame();
         output.beginUi();
 
-        float cx = output.getUiWidth()  / 2f;
+        float cx = output.getUiWidth() / 2f;
         float cy = output.getUiHeight() / 2f;
 
-        drawCentered(output, titleFont, "TUMOUR CELL",                              cx, cy + 140f);
-        drawCentered(output, titleFont, "SIMULATOR",                                cx, cy + 95f);
-        drawCentered(output, bodyFont,  "- - - - - - - - - -",                      cx, cy + 55f);
-        drawCentered(output, bodyFont,  "You are a cancer cell.",                   cx, cy + 20f);
-        drawCentered(output, bodyFont,  "Infect the body.",                         cx, cy - 10f);
-        drawCentered(output, bodyFont,  "Avoid the T-Cells.",                       cx, cy - 40f);
-        drawCentered(output, bodyFont,  "Evolve. Spread. Survive.",                 cx, cy - 70f);
-        drawCentered(output, bodyFont,  "- - - - - - - - - -",                      cx, cy - 105f);
-        drawCentered(output, bodyFont,  "ENTER: BEGIN INFECTION",                   cx, cy - 135f);
-        drawCentered(output, bodyFont,  "ARROW KEYS: Move  SHIFT: Dash  P: Pause", cx, cy - 165f);
+        drawCentered(output, titleFont, "TUMOUR CELL", cx, cy + 140f);
+        drawCentered(output, titleFont, "SIMULATOR", cx, cy + 95f);
+        drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy + 55f);
+        drawCentered(output, bodyFont, "You are a cancer cell.", cx, cy + 20f);
+        drawCentered(output, bodyFont, "Infect the body.", cx, cy - 10f);
+        drawCentered(output, bodyFont, "Avoid the T-Cells.", cx, cy - 40f);
+        drawCentered(output, bodyFont, "Evolve. Spread. Survive.", cx, cy - 70f);
+        drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy - 105f);
+        drawCentered(output, bodyFont, "ENTER: BEGIN INFECTION", cx, cy - 135f);
+        drawCentered(output, bodyFont, "ARROW KEYS: Move  SHIFT: Dash  P: Pause", cx, cy - 165f);
 
         output.endUi();
         output.endFrame();
@@ -72,7 +75,9 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onDispose() {
-        if (titleFont != null) titleFont.dispose();
-        if (bodyFont  != null) bodyFont.dispose();
+        if (titleFont != null)
+            titleFont.dispose();
+        if (bodyFont != null)
+            bodyFont.dispose();
     }
 }

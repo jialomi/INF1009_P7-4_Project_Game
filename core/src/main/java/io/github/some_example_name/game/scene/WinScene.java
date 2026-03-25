@@ -1,16 +1,17 @@
 package io.github.some_example_name.game.scene;
 
-import com.badlogic.gdx.Input;
+// import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
-import io.github.some_example_name.engine.io.DynamicInput;
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
-import io.github.some_example_name.game.io.WebIntegrationService; // <-- Added Import
+import io.github.some_example_name.game.io.CellIOController;
+import io.github.some_example_name.game.io.CellInputMapper;
+import io.github.some_example_name.game.io.WebIntegrationService;
 import io.github.some_example_name.game.util.RunStats;
 import io.github.some_example_name.game.util.SceneFlow;
 
@@ -22,14 +23,15 @@ public class WinScene extends AbstractScene {
 
     // The rotating phrases for when the tumor wins
     private final String[] winPhrases = {
-        "The host fails.",
-        "All systems collapse.",
-        "There is nothing left to resist you."
+            "The host fails.",
+            "All systems collapse.",
+            "There is nothing left to resist you."
     };
 
     public WinScene(SceneManager sceneManager, EngineServices services) {
         super(services);
-        if (sceneManager == null) throw new IllegalArgumentException("SceneManager cannot be null");
+        if (sceneManager == null)
+            throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
     }
 
@@ -38,20 +40,21 @@ public class WinScene extends AbstractScene {
         font = new BitmapFont();
         font.getData().setScale(1.8f);
         font.setColor(new Color(0.8f, 0.2f, 0.9f, 1f)); // purple for cancer win
-        
+
         // Randomly select one phrase when the scene loads
-        headerText = winPhrases[(int)(Math.random() * winPhrases.length)];
+        headerText = winPhrases[(int) (Math.random() * winPhrases.length)];
     }
 
     @Override
     protected void onUpdate(float delta) {
-        DynamicInput input = getServices().getInput();
-        if (input.isKeyJustPressed(Input.Keys.R)) {
+        CellInputMapper mapper = CellIOController.getInstance().getInputMapper();
+
+        if (mapper.checkRestartAction()) {
             SceneFlow.restartGame(sceneManager, getServices());
-        } else if (input.isKeyJustPressed(Input.Keys.ENTER)) {
+        } else if (mapper.checkConfirmAction()) {
             SceneFlow.goToStart(sceneManager);
-        } else if (input.isKeyJustPressed(Input.Keys.D)) {
-            // Trigger the browser link!
+        } else if (mapper.checkDonateAction()) {
+            // trigger browser link!
             new WebIntegrationService().openDonationSiteInBrowser();
         }
     }
@@ -62,18 +65,18 @@ public class WinScene extends AbstractScene {
         output.beginFrame();
         output.beginUi();
 
-        float cx = output.getUiWidth()  / 2f;
+        float cx = output.getUiWidth() / 2f;
         float cy = output.getUiHeight() / 2f;
 
         // Shifted the layout up slightly to center the new text block perfectly
-        drawCentered(output, headerText,                         cx, cy + 110f);
-        drawCentered(output, "- - - - - - - - - -",              cx, cy + 50f);
-        drawCentered(output, "CELLS EATEN: "  + RunStats.getLastScore(), cx, cy + 10f);
+        drawCentered(output, headerText, cx, cy + 110f);
+        drawCentered(output, "- - - - - - - - - -", cx, cy + 50f);
+        drawCentered(output, "CELLS EATEN: " + RunStats.getLastScore(), cx, cy + 10f);
         drawCentered(output, "TIME: " + String.format("%.1fs", RunStats.getLastSurvivalSeconds()), cx, cy - 25f);
-        drawCentered(output, "BEST: "   + RunStats.getBestScore(),       cx, cy - 60f);
-        drawCentered(output, "- - - - - - - - - -",              cx, cy - 100f);
-        drawCentered(output, "R: PLAY AGAIN   ENTER: MENU",      cx, cy - 140f);
-        drawCentered(output, "D: DONATE TO CANCER RESEARCH",     cx, cy - 180f); // New line!
+        drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, cy - 60f);
+        drawCentered(output, "- - - - - - - - - -", cx, cy - 100f);
+        drawCentered(output, "R: PLAY AGAIN   ENTER: MENU", cx, cy - 140f);
+        drawCentered(output, "D: DONATE TO CANCER RESEARCH", cx, cy - 180f); // New line!
 
         output.endUi();
         output.endFrame();
@@ -86,6 +89,7 @@ public class WinScene extends AbstractScene {
 
     @Override
     protected void onDispose() {
-        if (font != null) font.dispose();
+        if (font != null)
+            font.dispose();
     }
 }

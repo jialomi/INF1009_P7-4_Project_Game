@@ -10,39 +10,57 @@ import io.github.some_example_name.engine.io.EngineServices;
  */
 public class CellIOController {
 
+    // singleton setup
+    private static CellIOController instance;
+
+    public static void initialize(EngineServices services) {
+        if (instance == null) {
+            instance = new CellIOController(services);
+        }
+    }
+
+    public static CellIOController getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("CellIOController must be initialized first!");
+        }
+        return instance;
+    }
+
     private CellInputMapper inputMapper;
     private CellDataManager dataManager;
     private CellAudioHandler audioHandler;
     private CellUIRenderer uiRenderer;
     private WebIntegrationService webService;
 
-    public CellIOController(EngineServices services) {
-    if (services == null) {
-        throw new IllegalArgumentException("EngineServices cannot be null");
-    }
-    this.inputMapper = new CellInputMapper(services.getInput());
-    this.dataManager = new CellDataManager();
-    this.audioHandler = new CellAudioHandler(services.getAudio());
-    this.uiRenderer = new CellUIRenderer(services.getOutputManager());
-    this.webService = new WebIntegrationService();
+    // private constructor to enforce singleton
+    private CellIOController(EngineServices services) {
+        if (services == null)
+            throw new IllegalArgumentException("EngineServices cannot be null");
 
-    // ADD THIS LINE TO START THE MUSIC IMMEDIATELY
-    this.audioHandler.setOrganBGM("lungs"); 
+        this.inputMapper = new CellInputMapper(services.getInput());
+        this.dataManager = new CellDataManager();
+        this.audioHandler = new CellAudioHandler(services.getAudio());
+        this.uiRenderer = new CellUIRenderer(services.getOutputManager());
+        this.webService = new WebIntegrationService();
+
+        // add this line to start music immediately - ensure file exists first
+        // this.audioHandler.setOrganBGM("lungs");
     }
 
     /**
-     * MUST be called once when the organ level finishes loading.
-     * Sets up initial audio and state visuals.
+     * must be called once when organ level finishes loading
+     * sets up initial audio and state visuals
      */
     public void onLevelStart(CellGameState gameState) {
-        // Automatically pull the organ name from the save/game state and play the right BGM
+        // automatically pull organ name from save/game state and play correct bgm
         if (gameState != null && gameState.currentOrgan != null) {
             audioHandler.setOrganBGM(gameState.currentOrgan);
         } else {
-            // Fallback just in case
+            // fallback just in case
             audioHandler.setOrganBGM("lungs_bgm.mp3");
         }
     }
+
     /**
      * called every frame by active scene to poll inputs
      */

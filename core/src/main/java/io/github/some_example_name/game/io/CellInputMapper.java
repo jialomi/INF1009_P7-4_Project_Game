@@ -3,7 +3,6 @@ package io.github.some_example_name.game.io;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import java.util.UUID;
-
 import io.github.some_example_name.engine.io.DynamicInput;
 
 public class CellInputMapper {
@@ -11,9 +10,8 @@ public class CellInputMapper {
     private final DynamicInput input;
 
     public CellInputMapper(DynamicInput input) {
-        if (input == null) {
+        if (input == null)
             throw new IllegalArgumentException("DynamicInput cannot be null");
-        }
         this.input = input;
     }
 
@@ -27,25 +25,45 @@ public class CellInputMapper {
 
     public Vector2 processMovementInput() {
         Vector2 movement = new Vector2(0, 0);
-
-        if (input.isKeyPressed(Input.Keys.W) || input.isKeyPressed(Input.Keys.UP)) {
+        if (input.isKeyPressed(Input.Keys.W) || input.isKeyPressed(Input.Keys.UP))
             movement.y += 1;
-        }
-        if (input.isKeyPressed(Input.Keys.S) || input.isKeyPressed(Input.Keys.DOWN)) {
+        if (input.isKeyPressed(Input.Keys.S) || input.isKeyPressed(Input.Keys.DOWN))
             movement.y -= 1;
-        }
-        if (input.isKeyPressed(Input.Keys.A) || input.isKeyPressed(Input.Keys.LEFT)) {
+        if (input.isKeyPressed(Input.Keys.A) || input.isKeyPressed(Input.Keys.LEFT))
             movement.x -= 1;
-        }
-        if (input.isKeyPressed(Input.Keys.D) || input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (input.isKeyPressed(Input.Keys.D) || input.isKeyPressed(Input.Keys.RIGHT))
             movement.x += 1;
-        }
 
         // normalize to prevent faster diagonal movement
-        if (movement.len() > 0) {
+        if (movement.len() > 0)
             movement.nor();
-        }
         return movement;
+    }
+
+    // add intent methods here...
+
+    public boolean checkDashAction() {
+        return input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+    }
+
+    public boolean checkPauseAction() {
+        return input.isKeyJustPressed(Input.Keys.P);
+    }
+
+    public boolean checkMenuAction() {
+        return input.isKeyJustPressed(Input.Keys.ESCAPE);
+    }
+
+    public boolean checkConfirmAction() {
+        return input.isKeyJustPressed(Input.Keys.ENTER);
+    }
+
+    public boolean checkRestartAction() {
+        return input.isKeyJustPressed(Input.Keys.R);
+    }
+
+    public boolean checkDonateAction() {
+        return input.isKeyJustPressed(Input.Keys.D);
     }
 
     public boolean checkSplitAction() {
@@ -54,10 +72,6 @@ public class CellInputMapper {
 
     public boolean checkSwapAction() {
         return input.isKeyJustPressed(Input.Keys.TAB);
-    }
-
-    public boolean checkPauseAction() {
-        return input.isKeyJustPressed(Input.Keys.P) || input.isKeyJustPressed(Input.Keys.ESCAPE);
     }
 
     public Vector2 getMouseSelection() {
