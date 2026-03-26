@@ -15,13 +15,13 @@ public class CellInputMapper {
         this.input = input;
     }
 
-    public void setActiveCellId(UUID id) {
-        this.activeCellId = id;
-    }
+    // public void setActiveCellId(UUID id) {
+    // this.activeCellId = id;
+    // }
 
-    public UUID getActiveCellId() {
-        return activeCellId;
-    }
+    // public UUID getActiveCellId() {
+    // return activeCellId;
+    // }
 
     public Vector2 processMovementInput() {
         Vector2 movement = new Vector2(0f, 0f);
@@ -38,16 +38,11 @@ public class CellInputMapper {
         return movement;
     }
 
-    public float getHorizontalInput() {
-        return processMovementInput().x;
-    }
-
-    public boolean checkJumpAction() {
-        return input.isKeyJustPressed(Input.Keys.SPACE);
-    }
-
     public boolean checkDashAction() {
-        return input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+        // return input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+
+        // let user use either left or right shift
+        return input.isKeyPressed(Input.Keys.SHIFT_LEFT) || input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
     }
 
     public boolean checkPauseAction() {
@@ -70,17 +65,25 @@ public class CellInputMapper {
         return input.isKeyJustPressed(Input.Keys.O);
     }
 
-    public boolean checkSplitAction() {
-        return input.isKeyJustPressed(Input.Keys.SPACE);
-    }
-
-    public boolean checkSwapAction() {
-        return input.isKeyJustPressed(Input.Keys.TAB);
-    }
-
     public boolean checkDebugHitboxToggle() {
         return input.isKeyJustPressed(Input.Keys.F3);
     }
+
+    // public boolean checkJumpAction() {
+    // return input.isKeyJustPressed(Input.Keys.SPACE);
+    // }
+
+    // public float getHorizontalInput() {
+    // return processMovementInput().x;
+    // }
+
+    // public boolean checkSplitAction() {
+    // return input.isKeyJustPressed(Input.Keys.SPACE);
+    // }
+
+    // public boolean checkSwapAction() {
+    // return input.isKeyJustPressed(Input.Keys.TAB);
+    // }
 
     public Vector2 getMouseSelection() {
         return input.getMousePosition();
