@@ -15,3 +15,6 @@ build/reports/
 # OS/editor noise (optional)
 .DS_Store
 Thumbs.db
+
+#assets
+.tmp_assets/

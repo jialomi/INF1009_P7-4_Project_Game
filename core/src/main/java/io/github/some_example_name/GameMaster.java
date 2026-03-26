@@ -6,6 +6,9 @@ import com.badlogic.gdx.Gdx;
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputConfiguration;
 import io.github.some_example_name.engine.scene.SceneManager;
+import io.github.some_example_name.game.entity.CellFactory;
+import io.github.some_example_name.game.io.CellIOController;
+import io.github.some_example_name.game.io.GameAssetCatalog;
 import io.github.some_example_name.game.scene.GameScene;
 import io.github.some_example_name.game.scene.LoseScene;
 import io.github.some_example_name.game.scene.PauseScene;
@@ -18,6 +21,7 @@ public class GameMaster extends Game {
 
     private EngineServices services;
     private SceneManager sceneManager;
+    private CellIOController ioController;
 
     @Override
     public void create() {
@@ -27,22 +31,20 @@ public class GameMaster extends Game {
 
         services = new EngineServices(new OutputConfiguration(800f, 600f, 0f, 0f, 0f, 1f));
         services.initialize();
-        services.getAudio().preloadSound("crash.mp3");
-        services.getAudio().preloadSound("test.mp3");
-
-        // init celliocontroller singleton instance
-        io.github.some_example_name.game.io.CellIOController.initialize(services);
+        CellFactory.initializeSharedAssets(services.getAssets());
+        GameAssetCatalog.preloadAll(services.getAssets(), services.getAudio());
+        ioController = new CellIOController(services);
 
         services.getOutputManager().resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         sceneManager = new SceneManager(LOGIC_STEP_SECONDS, MAX_LOGIC_STEPS_PER_FRAME);
         sceneManager.setOnSceneActivated(() -> services.getInput().clearJustPressed());
 
-        sceneManager.load("start", new StartScene(sceneManager, services));
-        sceneManager.load("game", new GameScene(sceneManager, services));
-        sceneManager.load("pause", new PauseScene(sceneManager, services));
-        sceneManager.load("win", new WinScene(sceneManager, services));
-        sceneManager.load("lose", new LoseScene(sceneManager, services));
+        sceneManager.load("start", new StartScene(sceneManager, services, ioController));
+        sceneManager.load("game", new GameScene(sceneManager, services, ioController));
+        sceneManager.load("pause", new PauseScene(sceneManager, services, ioController));
+        sceneManager.load("win", new WinScene(sceneManager, services, ioController));
+        sceneManager.load("lose", new LoseScene(sceneManager, services, ioController));
 
         sceneManager.setActive("start");
         System.out.println("Engine Online: Start Scene Loaded");
@@ -68,6 +70,9 @@ public class GameMaster extends Game {
     public void dispose() {
         if (sceneManager != null) {
             sceneManager.dispose();
+        }
+        if (ioController != null) {
+            ioController.dispose();
         }
         if (services != null) {
             services.dispose();

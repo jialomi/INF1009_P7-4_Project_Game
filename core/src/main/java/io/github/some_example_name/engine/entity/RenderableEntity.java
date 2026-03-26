@@ -7,6 +7,8 @@ public abstract class RenderableEntity extends Entity implements Renderable {
     
     protected TextureRegion texture;
     protected Rectangle bounds;
+    private float drawOffsetX;
+    private float drawOffsetY;
     
     public RenderableEntity(float x, float y, float width, float height) {
         super(x, y, width, height);
@@ -21,7 +23,22 @@ public abstract class RenderableEntity extends Entity implements Renderable {
     @Override
     public TextureRegion getTexture() { return texture; }
 
+    @Override
+    public float getDrawOffsetX() {
+        return drawOffsetX;
+    }
+
+    @Override
+    public float getDrawOffsetY() {
+        return drawOffsetY;
+    }
+
     public void setTexture(TextureRegion texture) { this.texture = texture; }
+
+    protected void setDrawOffset(float drawOffsetX, float drawOffsetY) {
+        this.drawOffsetX = drawOffsetX;
+        this.drawOffsetY = drawOffsetY;
+    }
     
     @Override
     public void setSize(float width, float height) {

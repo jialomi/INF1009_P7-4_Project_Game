@@ -3,10 +3,7 @@ bg.png
 cancer_cell.png
 crash.mp3
 damage.mp3
-libgdx.png
-lungs.txt
 lungs_bgm.mp3
 squelch.mp3
 tcell_strip.png
-test.mp3
 wall_tile.png

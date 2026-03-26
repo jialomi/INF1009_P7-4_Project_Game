@@ -4,11 +4,10 @@ package io.github.some_example_name.game.util;
  * ChemoManager — time-based % infection reduction (chemotherapy).
  * SOLID/SRP: only responsible for chemo timing.
  *
- * Design changes for difficulty:
- * - Chemo activates at Stage 1 (not Stage 2)
- * - Hits every 15s instead of 20s
- * - Reduces spread by 8% instead of 5%
- * - Warn player 5s before (not 3s) — gives reaction time but keeps pressure
+ * Current behavior:
+ * - Activation is controlled by game flow and starts once the run reaches its chemo threshold
+ * - Once activated, chemo remains active for the rest of the run
+ * - Warn player 5s before each hit
  */
 public class ChemoManager {
 
@@ -20,7 +19,7 @@ public class ChemoManager {
     private boolean active      = false;
     private boolean warningSent = false;
 
-    /** Activates chemo. Call when Stage 1 is reached (i.e. game start). */
+    /** Activates chemo for the rest of the current run. */
     public void activate() {
         if (!active) {
             active = true;

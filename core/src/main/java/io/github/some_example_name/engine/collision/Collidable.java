@@ -20,4 +20,7 @@ public interface Collidable {
     default boolean isStaticBody() {
         return false;
     }
+    default boolean isSensor() {
+        return false;
+    }
 }

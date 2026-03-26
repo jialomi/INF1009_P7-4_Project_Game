@@ -1,55 +1,44 @@
 package io.github.some_example_name.game.movement;
 
+import com.badlogic.gdx.math.Vector2;
+
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.movement.MovementManager;
 
 public class PlayerMovement {
+    private static final float BASE_SPEED = 340f;
+    private static final float DASH_DURATION = 0.18f;
+    private static final float DASH_COOLDOWN = 0.9f;
+    private static final float DASH_MULTIPLIER = 2.1f;
+
     private final MovementManager movementManager;
-    private static final float DASH_DURATION = 0.2f;
-    private static final float DASH_COOLDOWN = 1f;
-    private static final float DASH_MULTIPLIER = 2f;
+    private float dashTimer;
+    private float cooldownTimer;
 
-    private float dashTimer = 0f; // counts down while dashing
-    private float cooldownTimer = 0f; // counts down during cooldown
+    public PlayerMovement() {
+        this(new MovementManager());
+    }
 
-    // Constructor
     public PlayerMovement(MovementManager movementManager) {
         this.movementManager = movementManager;
     }
 
-    public void update(float delta) {
-        if (dashTimer > 0f)
-            dashTimer -= delta;
-        if (cooldownTimer > 0f)
-            cooldownTimer -= delta;
-    }
-
-    // basic movement + dash ability
-    public void movePlayer(Entity player, float speed, float delta, com.badlogic.gdx.math.Vector2 direction,
-            boolean isDashing) {
-        if (isDashing && !isDashing() && cooldownTimer <= 0f) {
+    public void update(Entity player, Vector2 direction, boolean dashPressed, float deltaTime) {
+        if (dashTimer > 0f) {
+            dashTimer -= deltaTime;
+        }
+        if (cooldownTimer > 0f) {
+            cooldownTimer -= deltaTime;
+        }
+        if (dashPressed && !isDashing() && cooldownTimer <= 0f) {
             dashTimer = DASH_DURATION;
             cooldownTimer = DASH_COOLDOWN;
         }
-
-        // if dashing, apply multiplier to speed
-        float currentSpeed = isDashing() ? speed * DASH_MULTIPLIER : speed;
-        movementManager.moveByDirection(player, direction, currentSpeed, delta);
+        float speed = isDashing() ? BASE_SPEED * DASH_MULTIPLIER : BASE_SPEED;
+        movementManager.moveByDirection(player, direction, speed, deltaTime);
     }
 
     public boolean isDashing() {
         return dashTimer > 0f;
-    }
-
-    public boolean isOnCooldown() {
-        return cooldownTimer > 0f;
-    }
-
-    public float getCooldownTimer() {
-        return cooldownTimer;
-    }
-
-    public float getDashCooldown() {
-        return DASH_COOLDOWN;
     }
 }
