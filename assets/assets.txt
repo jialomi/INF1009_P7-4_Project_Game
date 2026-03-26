@@ -19,7 +19,11 @@ key-gui/settingKeys/numpad_enter.png
 key-gui/settingKeys/o.png
 key-gui/settingKeys/p.png
 key-gui/settingKeys/r.png
+losescene.jpg
 lungs_bgm.mp3
+pausescene.jpg
 squelch.mp3
+startscene.jpg
 tcell_strip.png
 wall_tile.png
+winscene.jpg

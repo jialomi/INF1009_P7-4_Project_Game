@@ -1,9 +1,9 @@
 package io.github.some_example_name.game.scene;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.Texture;
 
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
@@ -17,12 +17,19 @@ public class StartScene extends AbstractScene {
 
     private final SceneManager sceneManager;
     private final CellIOController ioController;
-    private BitmapFont titleFont;
-    private BitmapFont bodyFont;
+    
+    // -- CHANGES HERE --
+    // We remove titleFont as the title is now inside the image artwork
+    // We use smaller scales for bodyFont for description vs controls
+    private BitmapFont mainFont;
 
+    // -- CHANGES HERE --
+    // Load the new thumbnail image
+    private Texture thumbnailTexture;
+
+    // Key textures are retained
     private Texture wTexture, aTexture, sTexture, dTexture;
     private Texture upTexture, leftTexture, downTexture, rightTexture;
-
     private Texture enterTexture;
     private Texture shiftTexture;
     private Texture pTexture;
@@ -37,14 +44,16 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onInitialise() {
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(2.2f);
-        titleFont.setColor(new Color(0.8f, 0.2f, 0.9f, 1f));
+        // -- CHANGES HERE --
+        // Switch to a single font base, using internal scaling during render if needed
+        mainFont = new BitmapFont();
+        mainFont.setColor(Color.LIGHT_GRAY);
 
-        bodyFont = new BitmapFont();
-        bodyFont.getData().setScale(1.2f);
-        bodyFont.setColor(Color.LIGHT_GRAY);
+        // -- CHANGES HERE --
+        // Load your new thumbnail image. Replace path with where you saved it.
+        thumbnailTexture = new Texture("startscene.jpg");
 
+        // Key textures are loaded as before
         enterTexture = getServices().getAssets().getTexture("key-gui/settingKeys/enter.png");
         pTexture = getServices().getAssets().getTexture("key-gui/settingKeys/p.png");
         shiftTexture = getServices().getAssets().getTexture("key-gui/movement/shift.png");
@@ -67,64 +76,86 @@ public class StartScene extends AbstractScene {
         }
     }
 
-    @Override
+   @Override
     public void render(float delta, float interpolationAlpha) {
         OutputManager output = getServices().getOutputManager();
         output.beginFrame();
         output.beginUi();
 
-        float cx = output.getUiWidth() / 2f;
-        float cy = output.getUiHeight() / 2f;
+        float screenW = output.getUiWidth();
+        float screenH = output.getUiHeight();
+        float cx = screenW / 2f;
+        float cy = screenH / 2f;
 
-        drawCentered(output, titleFont, "TUMOUR CELL", cx, cy + 140f);
-        drawCentered(output, titleFont, "SIMULATOR", cx, cy + 95f);
-        drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy + 55f);
-        drawCentered(output, bodyFont, "You are a cancer cell.", cx, cy + 20f);
-        drawCentered(output, bodyFont, "Infect the body.", cx, cy - 10f);
-        drawCentered(output, bodyFont, "Avoid the T-Cells.", cx, cy - 40f);
-        drawCentered(output, bodyFont, "Evolve. Spread. Survive.", cx, cy - 70f);
-        drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy - 105f);
+        // ---------------------------------------------------------
+        // 1. FULL SCREEN BACKGROUND
+        // ---------------------------------------------------------
+        output.getBatch().setColor(1f, 1f, 1f, 1f); 
+        output.getBatch().draw(thumbnailTexture, 0, 0, screenW, screenH);
+        output.getBatch().setColor(Color.WHITE); 
 
-        UIUtils.drawPromptCentered(output, bodyFont, enterTexture, "[ENTER] BEGIN INFECTION", cx, cy - 135f);
+        // ---------------------------------------------------------
+        // 2. CENTERED LORE TEXT (Right below the title)
+        // ---------------------------------------------------------
+        mainFont.getData().setScale(1.2f);
+        mainFont.setColor(Color.WHITE);
+        
+        // SHIFTED UP: Increased from +20f to +130f to push it under the title
+        float descTop = cy + 45f; 
+        float lineSpace = 30f;
 
-        // movement clusters
-        float iconSize = 44f;
-        float gap = 4f;
-        float clusterWidth = (iconSize * 3f) + (gap * 2f);
-        float clusterY = cy - 270f;
-        float spacing = 20f;
+        drawCentered(output, mainFont, "You are a cancer cell.", cx, descTop);
+        drawCentered(output, mainFont, "Infect the body. Avoid the T-Cells.", cx, descTop - lineSpace);
+        drawCentered(output, mainFont, "Evolve. Spread. Survive.", cx, descTop - lineSpace * 2f);
+// ---------------------------------------------------------
+        // 3. ENTER PROMPT (Right below the paragraph)
+        // ---------------------------------------------------------
+        // INCREASED SCALE: Changed from 1.3f to 1.8f to make it much larger
+        mainFont.getData().setScale(2.1f); 
+        mainFont.setColor(Color.YELLOW); 
+        
+        // DYNAMIC POSITIONING: Increased the drop from -60f to -80f so the 
+        // bigger text doesn't bump into the paragraph above it!
+        float enterY = descTop - (lineSpace * 2f) - 200f; 
+        UIUtils.drawPromptCentered(output, mainFont, enterTexture, "BEGIN INFECTION", cx, enterY);
+        // ---------------------------------------------------------
+        // 4. CONTROLS (Tucked into bottom corners)
+        // ---------------------------------------------------------
+        mainFont.getData().setScale(1.0f);
+        mainFont.setColor(Color.LIGHT_GRAY);
+        
+        float iconSize = 40f;
+        
+        // ALIGNMENT GRID: Use these exact variables to keep left/right sides identical
+        float keysBaseY = 30f;   // Base line for ASD, Down Arrows, and [P]
+        float keysTopY = 75f;    // Base line for W, Up Arrow, and [SHIFT]
+        float labelY = 140f;     // Base line for MOVEMENT/ACTIONS headers (clears the W key now)
 
-        GlyphLayout slashLayout = new GlyphLayout(bodyFont, "/");
-        GlyphLayout moveLayout = new GlyphLayout(bodyFont, "[WASD/ARROWS] Move");
+        // --- Bottom Left: Movement ---
+        float leftX = 40f;
+        mainFont.draw(output.getBatch(), "MOVEMENT:", leftX, labelY);
+        
+        // Draw WASD and Arrows
+        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, leftX, keysBaseY, iconSize);
+        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, leftX + 160f, keysBaseY, iconSize);
 
-        float totalWidth = clusterWidth + spacing + slashLayout.width + spacing + clusterWidth + spacing
-                + moveLayout.width;
-        float startX = cx - (totalWidth / 2f);
-        float textY = clusterY + (iconSize * 1.25f);
-
-        // draw wasd
-        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, startX, clusterY, iconSize);
-        float currentX = startX + clusterWidth + spacing;
-
-        // draw "/"
-        bodyFont.draw(output.getBatch(), slashLayout, currentX, textY);
-        currentX += slashLayout.width + spacing;
-
-        // draw arrows
-        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, currentX, clusterY, iconSize);
-        currentX += clusterWidth + spacing;
-
-        // draw "Move"
-        bodyFont.draw(output.getBatch(), moveLayout, currentX, textY);
-
-        // dash and pause
-        UIUtils.drawPromptCentered(output, bodyFont, shiftTexture, "[SHIFT] Dash", cx - 140f, clusterY - 40f);
-        UIUtils.drawPromptCentered(output, bodyFont, pTexture, "[P] Pause", cx + 140f, clusterY - 40f);
+        // --- Bottom Right: Actions ---
+        float rightX = screenW - 250f;
+        mainFont.draw(output.getBatch(), "ACTIONS:", rightX, labelY); 
+        
+        // Draw Dash (Shift) - Visually aligned with the 'W' and 'Up' keys
+        output.getBatch().draw(shiftTexture, rightX, keysTopY, iconSize, iconSize);
+        mainFont.draw(output.getBatch(), "[SHIFT] Dash", rightX + iconSize + 10f, keysTopY + 25f);
+        
+        // Draw Pause (P) - Visually aligned with the 'ASD' and 'Down' keys
+        output.getBatch().draw(pTexture, rightX, keysBaseY, iconSize, iconSize);
+        mainFont.draw(output.getBatch(), "[P] Pause", rightX + iconSize + 10f, keysBaseY + 25f);
 
         output.endUi();
         output.endFrame();
     }
 
+    
     private void drawCentered(OutputManager output, BitmapFont font, String text, float cx, float y) {
         GlyphLayout layout = new GlyphLayout(font, text);
         font.draw(output.getBatch(), layout, cx - layout.width / 2f, y);
@@ -132,9 +163,13 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onDispose() {
-        if (titleFont != null)
-            titleFont.dispose();
-        if (bodyFont != null)
-            bodyFont.dispose();
+        // -- CHANGES HERE --
+        // Important: Dispose of the new thumbnail texture
+        if (thumbnailTexture != null)
+            thumbnailTexture.dispose();
+            
+        // Disposing fonts as before (variable name updated)
+        if (mainFont != null)
+            mainFont.dispose();
     }
 }

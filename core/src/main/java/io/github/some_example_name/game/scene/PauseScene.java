@@ -1,9 +1,9 @@
 package io.github.some_example_name.game.scene;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.Texture;
 
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
@@ -19,6 +19,9 @@ public class PauseScene extends AbstractScene {
     private final SceneManager sceneManager;
     private final CellIOController ioController;
     private BitmapFont font;
+
+    // Load the sleeping monster!
+    private Texture bgTexture; 
 
     private Texture pTexture, rTexture, escTexture;
     private Texture wTexture, aTexture, sTexture, dTexture;
@@ -36,8 +39,10 @@ public class PauseScene extends AbstractScene {
     @Override
     protected void onInitialise() {
         font = new BitmapFont();
-        font.getData().setScale(1.8f);
-        font.setColor(Color.YELLOW);
+        font.setColor(Color.WHITE);
+
+        // Load the artwork directly!
+        bgTexture = new Texture("pausescene.jpg");
 
         pTexture = getServices().getAssets().getTexture("key-gui/settingKeys/p.png");
         rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");
@@ -59,7 +64,7 @@ public class PauseScene extends AbstractScene {
     @Override
     protected void onUpdate(float delta) {
         CellInputMapper mapper = ioController.getInputMapper();
-
+        
         if (mapper.checkPauseAction()) {
             sceneManager.setActive("game");
         } else if (mapper.checkRestartAction()) {
@@ -75,52 +80,52 @@ public class PauseScene extends AbstractScene {
         output.beginFrame();
         output.beginUi();
 
-        float cx = output.getUiWidth() / 2f;
-        float cy = output.getUiHeight() / 2f;
+        float screenW = output.getUiWidth();
+        float screenH = output.getUiHeight();
+        float cx = screenW / 2f;
+        float cy = screenH / 2f;
 
-        drawCentered(output, "PAUSED", cx, cy + 100f);
-        drawCentered(output, "- - - - - - - - - - - -", cx, cy + 60f);
+        // 1. Draw the sleeping tumor full screen
+        output.getBatch().setColor(0.5f, 0.5f, 0.5f, 1f); // Dim it so text pops
+        output.getBatch().draw(bgTexture, 0, 0, screenW, screenH);
+        output.getBatch().setColor(Color.WHITE);
 
-        // UIUtils.drawPromptCentered(output, font, pTexture, "RESUME", cx, cy + 20f);
-        // UIUtils.drawPromptCentered(output, font, rTexture, "RESTART", cx, cy - 25f);
-        // UIUtils.drawPromptCentered(output, font, escTexture, "MAIN MENU", cx, cy -
-        // 70f);
+        // 2. PAUSE MENU
+        font.getData().setScale(2.0f);
+        font.setColor(Color.YELLOW);
+        drawCentered(output, "GAME PAUSED", cx, cy + 120f);
 
-        // left aligned stack
-        float leftColX = cx - 100f;
-        UIUtils.drawPromptLeftAligned(output, font, pTexture, "[P] RESUME", leftColX, cy + 20f);
-        UIUtils.drawPromptLeftAligned(output, font, rTexture, "[R] RESTART", leftColX, cy - 30f);
-        UIUtils.drawPromptLeftAligned(output, font, escTexture, "[ESC] MAIN MENU", leftColX, cy - 80f);
+        font.getData().setScale(1.2f);
+        font.setColor(Color.WHITE);
+        drawCentered(output, "- - - - - - - - - - - -", cx, cy + 70f);
 
-        UIUtils.drawTextCentered(output, font, "- - - - - - - - - - - -", cx, cy - 110f);
+        float menuStartX = cx - 110f; 
+        UIUtils.drawPromptLeftAligned(output, font, pTexture, "[P] RESUME", menuStartX, cy + 10f);
+        UIUtils.drawPromptLeftAligned(output, font, rTexture, "[R] RESTART", menuStartX, cy - 40f);
+        UIUtils.drawPromptLeftAligned(output, font, escTexture, "[ESC] MAIN MENU", menuStartX, cy - 90f);
+        
+        drawCentered(output, "- - - - - - - - - - - -", cx, cy - 130f);
 
-        // movement cluster - pause scene
-        float iconSize = 44f;
-        float gap = 4f;
-        float clusterWidth = (iconSize * 3f) + (gap * 2f);
-        float clusterY = cy - 240f;
-        float spacing = 20f;
+        // 3. CONTROLS
+        font.getData().setScale(1.0f);
+        font.setColor(Color.LIGHT_GRAY);
+        
+        float iconSize = 40f;
+        float keysBaseY = 30f;
+        float keysTopY = 75f;
+        float labelY = 140f;
 
-        GlyphLayout slashLayout = new GlyphLayout(font, "/");
-        GlyphLayout moveLayout = new GlyphLayout(font, "[WASD/ARROWS] Move");
+        float leftX = 40f;
+        font.draw(output.getBatch(), "MOVEMENT:", leftX, labelY);
+        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, leftX, keysBaseY, iconSize);
+        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, leftX + 160f, keysBaseY, iconSize);
 
-        float totalWidth = clusterWidth + spacing + slashLayout.width + spacing + clusterWidth + spacing
-                + moveLayout.width;
-        float startX = cx - (totalWidth / 2f);
-        float textY = clusterY + (iconSize * 1.25f);
-
-        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, startX, clusterY, iconSize);
-        float currentX = startX + clusterWidth + spacing;
-
-        font.draw(output.getBatch(), slashLayout, currentX, textY);
-        currentX += slashLayout.width + spacing;
-
-        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, currentX, clusterY, iconSize);
-        currentX += clusterWidth + spacing;
-
-        font.draw(output.getBatch(), moveLayout, currentX, textY);
-
-        UIUtils.drawPromptCentered(output, font, shiftTexture, "[SHIFT] Dash", cx, clusterY - 60f);
+        float rightX = screenW - 250f;
+        font.draw(output.getBatch(), "ACTIONS:", rightX, labelY);
+        output.getBatch().draw(shiftTexture, rightX, keysTopY, iconSize, iconSize);
+        font.draw(output.getBatch(), "[SHIFT] Dash", rightX + iconSize + 10f, keysTopY + 25f);
+        output.getBatch().draw(pTexture, rightX, keysBaseY, iconSize, iconSize);
+        font.draw(output.getBatch(), "[P] Resume", rightX + iconSize + 10f, keysBaseY + 25f);
 
         output.endUi();
         output.endFrame();
@@ -133,7 +138,7 @@ public class PauseScene extends AbstractScene {
 
     @Override
     protected void onDispose() {
-        if (font != null)
-            font.dispose();
+        if (font != null) font.dispose();
+        if (bgTexture != null) bgTexture.dispose();
     }
 }

@@ -34,7 +34,7 @@ public class GameScene extends AbstractScene {
     private static final float WORLD_WIDTH = 2000f;
     private static final float WORLD_HEIGHT = 2000f;
     private static final float WORLD_MARGIN = 64f;
-    private static final float WIN_TIME_SECONDS = 180f;
+    private static final float WIN_TIME_SECONDS = 120f;
     private static final int MAX_ACTIVE_TCELLS = 10;
     private static final int MAX_NORMAL_WAVES = 3;
     private static final float INTERACTION_QUERY_PADDING = 96f;
@@ -143,13 +143,16 @@ public class GameScene extends AbstractScene {
             ioController.getAudioHandler().playRadioactiveAlert();
         }
 
-        if (player.getHp() <= 0f || elapsedSeconds >= WIN_TIME_SECONDS) {
+        // 1. You only lose if your health drops to 0
+        if (player.getHp() <= 0f) {
             loseRun();
             return;
         }
 
-        if (cancerManager.isBodyFullyInfected()) {
+        // 2. You win if you fully infect the body OR if you survive the entire time limit
+        if (cancerManager.isBodyFullyInfected() || elapsedSeconds >= WIN_TIME_SECONDS) {
             winRun();
+            return;
         }
     }
 
