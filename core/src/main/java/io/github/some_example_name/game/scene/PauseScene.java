@@ -88,9 +88,9 @@ public class PauseScene extends AbstractScene {
 
         // left aligned stack
         float leftColX = cx - 100f;
-        UIUtils.drawPromptLeftAligned(output, font, pTexture, "RESUME", leftColX, cy + 20f);
-        UIUtils.drawPromptLeftAligned(output, font, rTexture, "RESTART", leftColX, cy - 30f);
-        UIUtils.drawPromptLeftAligned(output, font, escTexture, "MAIN MENU", leftColX, cy - 80f);
+        UIUtils.drawPromptLeftAligned(output, font, pTexture, "[P] RESUME", leftColX, cy + 20f);
+        UIUtils.drawPromptLeftAligned(output, font, rTexture, "[R] RESTART", leftColX, cy - 30f);
+        UIUtils.drawPromptLeftAligned(output, font, escTexture, "[ESC] MAIN MENU", leftColX, cy - 80f);
 
         UIUtils.drawTextCentered(output, font, "- - - - - - - - - - - -", cx, cy - 110f);
 
@@ -102,7 +102,7 @@ public class PauseScene extends AbstractScene {
         float spacing = 20f;
 
         GlyphLayout slashLayout = new GlyphLayout(font, "/");
-        GlyphLayout moveLayout = new GlyphLayout(font, "Move");
+        GlyphLayout moveLayout = new GlyphLayout(font, "[WASD/ARROWS] Move");
 
         float totalWidth = clusterWidth + spacing + slashLayout.width + spacing + clusterWidth + spacing
                 + moveLayout.width;
@@ -120,7 +120,7 @@ public class PauseScene extends AbstractScene {
 
         font.draw(output.getBatch(), moveLayout, currentX, textY);
 
-        UIUtils.drawPromptCentered(output, font, shiftTexture, "Dash", cx, clusterY - 60f);
+        UIUtils.drawPromptCentered(output, font, shiftTexture, "[SHIFT] Dash", cx, clusterY - 60f);
 
         output.endUi();
         output.endFrame();

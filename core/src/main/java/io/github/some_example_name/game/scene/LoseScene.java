@@ -23,7 +23,7 @@ public class LoseScene extends AbstractScene {
     private BitmapFont font;
     private String headerText;
 
-    private Texture rTexture, enterTexture, oTexture;
+    private Texture rTexture, escTexture, oTexture;
 
     // The rotating phrases for when the tumor is defeated
     private final String[] losePhrases = {
@@ -50,7 +50,7 @@ public class LoseScene extends AbstractScene {
         headerText = losePhrases[(int) (Math.random() * losePhrases.length)];
 
         rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");
-        enterTexture = getServices().getAssets().getTexture("key-gui/settingKeys/enter.png");
+        escTexture = getServices().getAssets().getTexture("key-gui/settingKeys/escape.png");
         oTexture = getServices().getAssets().getTexture("key-gui/settingKeys/o.png");
     }
 
@@ -60,7 +60,7 @@ public class LoseScene extends AbstractScene {
 
         if (mapper.checkRestartAction()) {
             SceneFlow.restartGame(sceneManager, getServices(), ioController);
-        } else if (mapper.checkConfirmAction()) {
+        } else if (mapper.checkMenuAction()) {
             SceneFlow.goToStart(sceneManager);
         } else if (mapper.checkDonateAction()) {
             ioController.getWebService().openDonationSiteInBrowser();
@@ -83,9 +83,9 @@ public class LoseScene extends AbstractScene {
         drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, cy - 60f);
         drawCentered(output, "- - - - - - - - - - - -", cx, cy - 100f);
 
-        UIUtils.drawPromptCentered(output, font, rTexture, "PLAY AGAIN", cx - 120f, cy - 140f);
-        UIUtils.drawPromptCentered(output, font, enterTexture, "MENU", cx + 120f, cy - 140f);
-        UIUtils.drawPromptCentered(output, font, oTexture, "OPEN DONATION PAGE", cx, cy - 185f);
+        UIUtils.drawPromptCentered(output, font, rTexture, "[R] PLAY AGAIN", cx - 130f, cy - 140f);
+        UIUtils.drawPromptCentered(output, font, escTexture, "[ESC] MENU", cx + 130f, cy - 140f);
+        UIUtils.drawPromptCentered(output, font, oTexture, "[O] OPEN DONATION PAGE", cx, cy - 185f);
 
         output.endUi();
         output.endFrame();

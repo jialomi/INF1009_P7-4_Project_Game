@@ -85,7 +85,7 @@ public class StartScene extends AbstractScene {
         drawCentered(output, bodyFont, "Evolve. Spread. Survive.", cx, cy - 70f);
         drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy - 105f);
 
-        UIUtils.drawPromptCentered(output, bodyFont, enterTexture, "BEGIN INFECTION", cx, cy - 135f);
+        UIUtils.drawPromptCentered(output, bodyFont, enterTexture, "[ENTER] BEGIN INFECTION", cx, cy - 135f);
 
         // movement clusters
         float iconSize = 44f;
@@ -95,7 +95,7 @@ public class StartScene extends AbstractScene {
         float spacing = 20f;
 
         GlyphLayout slashLayout = new GlyphLayout(bodyFont, "/");
-        GlyphLayout moveLayout = new GlyphLayout(bodyFont, "Move");
+        GlyphLayout moveLayout = new GlyphLayout(bodyFont, "[WASD/ARROWS] Move");
 
         float totalWidth = clusterWidth + spacing + slashLayout.width + spacing + clusterWidth + spacing
                 + moveLayout.width;
@@ -118,8 +118,8 @@ public class StartScene extends AbstractScene {
         bodyFont.draw(output.getBatch(), moveLayout, currentX, textY);
 
         // dash and pause
-        UIUtils.drawPromptCentered(output, bodyFont, shiftTexture, "Dash", cx - 140f, clusterY - 40f);
-        UIUtils.drawPromptCentered(output, bodyFont, pTexture, "Pause", cx + 140f, clusterY - 40f);
+        UIUtils.drawPromptCentered(output, bodyFont, shiftTexture, "[SHIFT] Dash", cx - 140f, clusterY - 40f);
+        UIUtils.drawPromptCentered(output, bodyFont, pTexture, "[P] Pause", cx + 140f, clusterY - 40f);
 
         output.endUi();
         output.endFrame();

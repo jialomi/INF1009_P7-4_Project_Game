@@ -140,8 +140,8 @@ public final class GameHudRenderer {
 
         // calculate exact text widths to right-align entire block
         GlyphLayout slashLayout = new GlyphLayout(font, "/");
-        GlyphLayout moveLayout = new GlyphLayout(font, "Move");
-        GlyphLayout dashLayout = new GlyphLayout(font, "Dash");
+        GlyphLayout moveLayout = new GlyphLayout(font, "[WASD/ARROWS] Move");
+        GlyphLayout dashLayout = new GlyphLayout(font, "[SHIFT] Dash");
 
         float shiftRatio = (float) shiftTexture.getWidth() / shiftTexture.getHeight();
         float shiftWidth = singleIconSize * shiftRatio;
@@ -187,14 +187,14 @@ public final class GameHudRenderer {
         output.getBatch().draw(f3Texture, bottomX, f3RowY, singleIconSize, singleIconSize);
         bottomX += singleIconSize + 8f;
 
-        GlyphLayout f3Layout = new GlyphLayout(font, "Toggle hitboxes");
+        GlyphLayout f3Layout = new GlyphLayout(font, "[F3] Toggle hitboxes");
         font.draw(output.getBatch(), f3Layout, bottomX, f3RowY + singleIconSize - 4f);
         bottomX += f3Layout.width + 40f;
 
         // draw "Pause"
         output.getBatch().draw(pTexture, bottomX, f3RowY, singleIconSize, singleIconSize);
         bottomX += singleIconSize + 8f;
-        font.draw(output.getBatch(), "Pause", bottomX, f3RowY + singleIconSize - 4f);
+        font.draw(output.getBatch(), "[P] Pause", bottomX, f3RowY + singleIconSize - 4f);
 
         output.endUi();
     }
