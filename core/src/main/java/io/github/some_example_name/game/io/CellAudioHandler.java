@@ -21,7 +21,7 @@ public class CellAudioHandler {
     }
 
     public void playRadioactiveAlert() {
-        audio.playSound("alert.mp3");
+        audio.playSound("crash.mp3");
     }
 
     public void setOrganBGM(String organName) {

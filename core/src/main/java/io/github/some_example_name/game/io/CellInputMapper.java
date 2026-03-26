@@ -24,23 +24,27 @@ public class CellInputMapper {
     }
 
     public Vector2 processMovementInput() {
-        Vector2 movement = new Vector2(0, 0);
+        Vector2 movement = new Vector2(0f, 0f);
         if (input.isKeyPressed(Input.Keys.W) || input.isKeyPressed(Input.Keys.UP))
-            movement.y += 1;
+            movement.y += 1f;
         if (input.isKeyPressed(Input.Keys.S) || input.isKeyPressed(Input.Keys.DOWN))
-            movement.y -= 1;
+            movement.y -= 1f;
         if (input.isKeyPressed(Input.Keys.A) || input.isKeyPressed(Input.Keys.LEFT))
-            movement.x -= 1;
+            movement.x -= 1f;
         if (input.isKeyPressed(Input.Keys.D) || input.isKeyPressed(Input.Keys.RIGHT))
-            movement.x += 1;
-
-        // normalize to prevent faster diagonal movement
-        if (movement.len() > 0)
+            movement.x += 1f;
+        if (movement.len2() > 0f)
             movement.nor();
         return movement;
     }
 
-    // add intent methods here...
+    public float getHorizontalInput() {
+        return processMovementInput().x;
+    }
+
+    public boolean checkJumpAction() {
+        return input.isKeyJustPressed(Input.Keys.SPACE);
+    }
 
     public boolean checkDashAction() {
         return input.isKeyPressed(Input.Keys.SHIFT_LEFT);
@@ -63,7 +67,7 @@ public class CellInputMapper {
     }
 
     public boolean checkDonateAction() {
-        return input.isKeyJustPressed(Input.Keys.D);
+        return input.isKeyJustPressed(Input.Keys.O);
     }
 
     public boolean checkSplitAction() {
@@ -74,8 +78,11 @@ public class CellInputMapper {
         return input.isKeyJustPressed(Input.Keys.TAB);
     }
 
+    public boolean checkDebugHitboxToggle() {
+        return input.isKeyJustPressed(Input.Keys.F3);
+    }
+
     public Vector2 getMouseSelection() {
-        // relies on OutputManager to unproject the coordinates behind the scenes
         return input.getMousePosition();
     }
 }

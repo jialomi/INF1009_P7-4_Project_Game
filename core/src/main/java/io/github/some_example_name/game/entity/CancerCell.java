@@ -1,105 +1,88 @@
 package io.github.some_example_name.game.entity;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import io.github.some_example_name.engine.collision.Collidable;
-import io.github.some_example_name.engine.movement.MovementManager;
+import io.github.some_example_name.game.io.CellInputMapper;
 import io.github.some_example_name.game.movement.PlayerMovement;
 
-import io.github.some_example_name.game.io.CellIOController;
-import io.github.some_example_name.game.io.CellInputMapper;
-
 public class CancerCell extends GameEntity {
+    private static final float STARTING_SIZE = 72f;
+    private static final float EXP_PER_LEVEL = 100f;
+    private static final float MOVEMENT_ANIMATION_THRESHOLD = 0.01f;
 
     private final HealthBar healthBar;
-    // private final DynamicInput input;
     private final PlayerMovement playerMovement;
-    private Animation<TextureRegion> walkAnimation;
-
-    private static final float STARTING_SIZE = 90f;
-    private static final float EXP_PER_LEVEL = 100f;
+    private final CellInputMapper inputMapper;
+    private final AnimationStateController<CancerCellState> animationController;
 
     private float exp = 0f;
-    private float stateTime = 0f;
     private float expToNextLevel = EXP_PER_LEVEL;
     private int level = 1;
 
-    public CancerCell(float x, float y) {
-        super(x, y, STARTING_SIZE);
-        applySize(STARTING_SIZE);
-
-        this.healthBar = new HealthBar(this, STARTING_SIZE, 5f, 4f);
-        this.playerMovement = new PlayerMovement(new MovementManager());
-
-        Texture sheet = new Texture("cancer_cell.png");
-        TextureRegion[][] tmp = TextureRegion.split(sheet, sheet.getWidth() / 4, sheet.getHeight() / 1);
-        TextureRegion[] frames = new TextureRegion[4];
-        int index = 0;
-        for (int i = 0; i < 1; i++) {
-            for (int j = 0; j < 4; j++) {
-                frames[index++] = tmp[i][j];
-            }
+    public CancerCell(float x, float y, CellInputMapper inputMapper) {
+        super(x, y, STARTING_SIZE, STARTING_SIZE);
+        if (inputMapper == null) {
+            throw new IllegalArgumentException("CellInputMapper cannot be null.");
         }
-        this.walkAnimation = new Animation<>(0.15f, frames);
-        this.walkAnimation.setPlayMode(Animation.PlayMode.LOOP);
-        this.texture = walkAnimation.getKeyFrame(0f);
+
+        this.inputMapper = inputMapper;
+        this.healthBar = new HealthBar(this, STARTING_SIZE, 5f, 4f);
+        this.playerMovement = new PlayerMovement();
+        this.animationController = new AnimationStateController<>(CancerCellState.class, CancerCellState.IDLE);
+
+        Animation<TextureRegion> walkAnimation = CellAssets.getCancerWalkAnimation();
+        TextureRegion idleFrame = walkAnimation.getKeyFrame(0f);
+        animationController.setStillFrame(CancerCellState.IDLE, idleFrame);
+        animationController.setAnimation(CancerCellState.RUN, walkAnimation);
+        animationController.setStillFrame(CancerCellState.JUMP, idleFrame);
+        animationController.setStillFrame(CancerCellState.FALL, idleFrame);
+
+        applySize(STARTING_SIZE);
+        setHitboxInsets(12f, 7f, 4f, 9f);
+        setUseCircularHitbox(true);
+        setDrawOffset(0f, 0f);
+        setTexture(idleFrame);
     }
 
     @Override
     public void update(float deltaTime) {
-        stateTime += deltaTime;
-        this.texture = walkAnimation.getKeyFrame(stateTime);
-
-        playerMovement.update(deltaTime);
-
-        // new input mapping logic
-        // get mapper from singleton
-        CellInputMapper mapper = CellIOController.getInstance().getInputMapper();
-
-        // poll clean data
-        Vector2 dir = mapper.processMovementInput();
-        boolean isDashing = mapper.checkDashAction();
-
-        // pass it to refactored movement manager
-        playerMovement.movePlayer(this, 200f, deltaTime, dir, isDashing);
-        // -------------------------------
-
-        float x = Math.max(64f, Math.min(getPositionX(), 2000f - 64f - getWidth()));
-        float y = Math.max(64f, Math.min(getPositionY(), 2000f - 64f - getHeight()));
-        setPosition(x, y);
+        Vector2 direction = inputMapper.processMovementInput();
+        playerMovement.update(this, direction, inputMapper.checkDashAction(), deltaTime);
+        animationController.setState(resolveAnimationState(direction), false);
+        animationController.update(deltaTime);
+        setTexture(animationController.getCurrentFrame());
     }
 
     @Override
     public void onCollision(Collidable other) {
-        // GameScene handles all collision logic — do nothing here
+        // GameScene handles gameplay outcomes.
     }
 
     public void gainExp(float amount) {
         this.exp += amount;
-        if (this.exp >= expToNextLevel)
+        if (this.exp >= expToNextLevel) {
             levelUp();
+        }
     }
 
     private void levelUp() {
         level++;
         exp = 0f;
         expToNextLevel *= 1.5f;
-        float newSize = getSize() + 10f;
-        applySize(newSize);
-        healthBar.getOwner();
+        applySize(getSize() + 8f);
     }
 
     @Override
     public int getCollisionLayer() {
-        return 1 << 0;
+        return GameCollisionLayers.PLAYER;
     }
 
     @Override
     public int getCollisionMask() {
-        return (1 << 1) | (1 << 2);
+        return GameCollisionLayers.HEALTHY_CELL | GameCollisionLayers.IMMUNE_CELL;
     }
 
     public HealthBar getHealthBar() {
@@ -119,7 +102,12 @@ public class CancerCell extends GameEntity {
     }
 
     public TextureRegion getCurrentTexture() {
-        // returns current frame of walk animation that was set in update() loop
-        return (TextureRegion) this.texture;
+        return getTexture();
+    }
+
+    private CancerCellState resolveAnimationState(Vector2 direction) {
+        return direction != null && direction.len2() > MOVEMENT_ANIMATION_THRESHOLD
+                ? CancerCellState.RUN
+                : CancerCellState.IDLE;
     }
 }

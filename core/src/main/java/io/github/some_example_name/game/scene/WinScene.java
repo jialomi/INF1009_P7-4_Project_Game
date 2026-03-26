@@ -17,6 +17,7 @@ import io.github.some_example_name.game.util.SceneFlow;
 public class WinScene extends AbstractScene {
 
     private final SceneManager sceneManager;
+    private final CellIOController ioController;
     private BitmapFont font;
     private String headerText;
 
@@ -27,11 +28,12 @@ public class WinScene extends AbstractScene {
             "There is nothing left to resist you."
     };
 
-    public WinScene(SceneManager sceneManager, EngineServices services) {
+    public WinScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
         if (sceneManager == null)
             throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
+        this.ioController = ioController;
     }
 
     @Override
@@ -46,15 +48,14 @@ public class WinScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        CellInputMapper mapper = CellIOController.getInstance().getInputMapper();
+        CellInputMapper mapper = ioController.getInputMapper();
 
         if (mapper.checkRestartAction()) {
-            SceneFlow.restartGame(sceneManager, getServices());
+            SceneFlow.restartGame(sceneManager, getServices(), ioController);
         } else if (mapper.checkConfirmAction()) {
             SceneFlow.goToStart(sceneManager);
         } else if (mapper.checkDonateAction()) {
-            // trigger browser link!
-            new WebIntegrationService().openDonationSiteInBrowser();
+            ioController.getWebService().openDonationSiteInBrowser();
         }
     }
 
@@ -75,7 +76,7 @@ public class WinScene extends AbstractScene {
         drawCentered(output, "BEST: " + RunStats.getBestScore(), cx, cy - 60f);
         drawCentered(output, "- - - - - - - - - -", cx, cy - 100f);
         drawCentered(output, "R: PLAY AGAIN   ENTER: MENU", cx, cy - 140f);
-        drawCentered(output, "D: DONATE TO CANCER RESEARCH", cx, cy - 180f); // New line!
+        drawCentered(output, "O: OPEN DONATION PAGE", cx, cy - 180f);
 
         output.endUi();
         output.endFrame();

@@ -14,3 +14,9 @@ task runRegressionTests(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   mainClass = 'io.github.some_example_name.tests.unit.EngineRegressionSelfTest'
 }
+
+task runGameRegressionTests(type: JavaExec) {
+  description = 'Runs GameRegressionSelfTest (no window required)'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'io.github.some_example_name.game.tests.GameRegressionSelfTest'
+}

@@ -1,19 +1,26 @@
 package io.github.some_example_name.game.entity;
 
+import io.github.some_example_name.engine.io.AssetService;
+import io.github.some_example_name.game.io.CellInputMapper;
+
 public class CellFactory {
+    public static void initializeSharedAssets(AssetService assets) {
+        CellAssets.initialize(assets);
+    }
 
-  // Creates a player-controlled CancerCell at the given position
-  public static CancerCell createCancerCell(float x, float y) {
-    return new CancerCell(x, y);
-  }
+    public static CancerCell createCancerCell(float x, float y, CellInputMapper inputMapper) {
+        return new CancerCell(x, y, inputMapper);
+    }
 
-  // Creates an enemy NormalCell at the given position
-  public static NormalCell createNormalCell(float x, float y, float speed, float fleeRange) {
-    return new NormalCell(x, y, speed, fleeRange);
-  }
+    public static NormalCell createNormalCell(float x, float y, float speed, float fleeRange) {
+        return new NormalCell(x, y, speed, fleeRange);
+    }
 
-  // Create an enemy TCell at the given position
-  public static TCell createTCell(float x, float y, float speed) {
-    return new TCell(x, y, speed);
-  }
+    public static TCell createTCell(float x, float y, float speed) {
+        return new TCell(x, y, speed);
+    }
+
+    public static void disposeSharedAssets() {
+        CellAssets.dispose();
+    }
 }

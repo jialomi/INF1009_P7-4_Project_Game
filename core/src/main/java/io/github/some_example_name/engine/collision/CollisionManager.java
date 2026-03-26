@@ -302,6 +302,7 @@ public class CollisionManager {
     }
 
     private void separateByContact(Collidable a, Collidable b, CollisionContact contact) {
+        if (a.isSensor() || b.isSensor()) return;
         if (!(a instanceof PhysicalBody) || !(b instanceof PhysicalBody)) return;
 
         float invMassA = a.isStaticBody() ? 0f : 1f;

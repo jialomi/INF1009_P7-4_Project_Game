@@ -7,4 +7,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public interface Renderable {
     TextureRegion getTexture();
+
+    default float getDrawOffsetX() {
+        return 0f;
+    }
+
+    default float getDrawOffsetY() {
+        return 0f;
+    }
 }
