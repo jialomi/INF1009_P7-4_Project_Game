@@ -5,11 +5,32 @@ import io.github.some_example_name.engine.io.AudioOutput;
 
 public final class GameAssetCatalog {
     private static final String[] TEXTURES = {
+            // game textures
             "bg.png",
             "wall_tile.png",
             "cancer_cell.png",
             "Normal_cell.png",
-            "tcell_strip.png"
+            "tcell_strip.png",
+
+            // key gui - setting keys
+            "key-gui/settingKeys/enter.png",
+            "key-gui/settingKeys/escape.png",
+            "key-gui/settingKeys/f3.png",
+            "key-gui/settingKeys/numpad_enter.png",
+            "key-gui/settingKeys/o.png",
+            "key-gui/settingKeys/p.png",
+            "key-gui/settingKeys/r.png",
+
+            // Key GUI - Movement
+            "key-gui/movement/a.png",
+            "key-gui/movement/arrow_down.png",
+            "key-gui/movement/arrow_left.png",
+            "key-gui/movement/arrow_right.png",
+            "key-gui/movement/arrow_up.png",
+            "key-gui/movement/d.png",
+            "key-gui/movement/s.png",
+            "key-gui/movement/shift.png",
+            "key-gui/movement/w.png",
     };
 
     private static final String[] SOUNDS = {
