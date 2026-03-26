@@ -15,13 +15,15 @@ import io.github.some_example_name.game.util.SceneFlow;
 public class PauseScene extends AbstractScene {
 
     private final SceneManager sceneManager;
+    private final CellIOController ioController;
     private BitmapFont font;
 
-    public PauseScene(SceneManager sceneManager, EngineServices services) {
+    public PauseScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
         if (sceneManager == null)
             throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
+        this.ioController = ioController;
     }
 
     @Override
@@ -33,12 +35,12 @@ public class PauseScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        CellInputMapper mapper = CellIOController.getInstance().getInputMapper();
+        CellInputMapper mapper = ioController.getInputMapper();
 
         if (mapper.checkPauseAction()) {
             sceneManager.setActive("game");
         } else if (mapper.checkRestartAction()) {
-            SceneFlow.restartGame(sceneManager, getServices());
+            SceneFlow.restartGame(sceneManager, getServices(), ioController);
         } else if (mapper.checkMenuAction()) {
             SceneFlow.goToStart(sceneManager);
         }
@@ -59,7 +61,7 @@ public class PauseScene extends AbstractScene {
         drawCentered(output, "R: RESTART", cx, cy - 20f);
         drawCentered(output, "ESC: MAIN MENU", cx, cy - 60f);
         drawCentered(output, "- - - - - - - - - -", cx, cy - 100f);
-        drawCentered(output, "ARROW KEYS: Move", cx, cy - 135f);
+        drawCentered(output, "WASD / ARROWS: Move", cx, cy - 135f);
         drawCentered(output, "SHIFT: Dash", cx, cy - 165f);
 
         output.endUi();

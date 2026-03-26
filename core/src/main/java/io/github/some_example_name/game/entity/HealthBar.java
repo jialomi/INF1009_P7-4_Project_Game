@@ -18,12 +18,17 @@ public class HealthBar {
   }
 
   public void render(ShapeRenderer shapeRenderer) {
+    render(shapeRenderer, 1f);
+  }
+
+  public void render(ShapeRenderer shapeRenderer, float interpolationAlpha) {
     float percentage = getPercentage();
 
-    // Perfectly center the health bar based on current growing size!
-    float centerX = owner.getPositionX() + (owner.getWidth() / 2f);
+    float drawX = owner.getInterpolatedPositionX(interpolationAlpha);
+    float drawY = owner.getInterpolatedPositionY(interpolationAlpha);
+    float centerX = drawX + (owner.getWidth() / 2f);
     float x = centerX - (barWidth / 2f);
-    float y = owner.getPositionY() + owner.getHeight() + yOffset;
+    float y = drawY + owner.getHeight() + yOffset;
 
     // Background (Dark gray so it doesn't look like damage)
     shapeRenderer.setColor(Color.DARK_GRAY);

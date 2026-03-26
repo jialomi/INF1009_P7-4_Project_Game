@@ -9,20 +9,21 @@ import io.github.some_example_name.engine.io.OutputManager;
 import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
 import io.github.some_example_name.game.io.CellIOController;
-import io.github.some_example_name.game.io.CellInputMapper;
 import io.github.some_example_name.game.util.SceneFlow;
 
 public class StartScene extends AbstractScene {
 
     private final SceneManager sceneManager;
+    private final CellIOController ioController;
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
 
-    public StartScene(SceneManager sceneManager, EngineServices services) {
+    public StartScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
         if (sceneManager == null)
             throw new IllegalArgumentException("SceneManager cannot be null");
         this.sceneManager = sceneManager;
+        this.ioController = ioController;
     }
 
     @Override
@@ -38,8 +39,8 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        if (CellIOController.getInstance().getInputMapper().checkConfirmAction()) {
-            SceneFlow.restartGame(sceneManager, getServices());
+        if (ioController.getInputMapper().checkConfirmAction()) {
+            SceneFlow.restartGame(sceneManager, getServices(), ioController);
         }
     }
 
@@ -61,7 +62,7 @@ public class StartScene extends AbstractScene {
         drawCentered(output, bodyFont, "Evolve. Spread. Survive.", cx, cy - 70f);
         drawCentered(output, bodyFont, "- - - - - - - - - -", cx, cy - 105f);
         drawCentered(output, bodyFont, "ENTER: BEGIN INFECTION", cx, cy - 135f);
-        drawCentered(output, bodyFont, "ARROW KEYS: Move  SHIFT: Dash  P: Pause", cx, cy - 165f);
+        drawCentered(output, bodyFont, "WASD / ARROWS: Move  SHIFT: Dash  P: Pause", cx, cy - 165f);
 
         output.endUi();
         output.endFrame();

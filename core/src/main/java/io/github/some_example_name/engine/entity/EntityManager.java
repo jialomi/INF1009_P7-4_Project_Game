@@ -83,11 +83,16 @@ public class EntityManager implements IEntityManager {
 
         updating = true;
         try {
+            boolean anyActiveEntityUpdated = false;
             for (Entity entity : new ArrayList<>(entities.values())) {
                 if (entity != null && entity.isActive()) {
+                    anyActiveEntityUpdated = true;
                     entity.capturePreviousState();
                     entity.update(deltaTime);
                 }
+            }
+            if (anyActiveEntityUpdated) {
+                markSpatialIndexDirty();
             }
         } finally {
             updating = false;
