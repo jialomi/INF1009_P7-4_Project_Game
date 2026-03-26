@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.Texture;
 
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.io.OutputManager;
@@ -16,16 +18,38 @@ import io.github.some_example_name.game.entity.NormalCell;
 import io.github.some_example_name.game.entity.TCell;
 import io.github.some_example_name.game.util.CancerEvolutionManager;
 import io.github.some_example_name.game.util.ChemoManager;
+import io.github.some_example_name.engine.io.AssetService;
+import io.github.some_example_name.game.util.UIUtils;
 
 public final class GameHudRenderer {
     private final BitmapFont font;
     private final ShapeRenderer shapeRenderer;
 
-    public GameHudRenderer() {
+    // key gui
+    private final Texture wTexture, aTexture, sTexture, dTexture;
+    private final Texture upTexture, leftTexture, downTexture, rightTexture;
+    private final Texture shiftTexture, pTexture, f3Texture;
+
+    public GameHudRenderer(AssetService assets) {
         this.font = new BitmapFont();
         this.font.setColor(Color.WHITE);
         this.font.getData().setScale(1.05f);
         this.shapeRenderer = new ShapeRenderer();
+
+        // load textures from asset manager
+        this.wTexture = assets.getTexture("key-gui/movement/w.png");
+        this.aTexture = assets.getTexture("key-gui/movement/a.png");
+        this.sTexture = assets.getTexture("key-gui/movement/s.png");
+        this.dTexture = assets.getTexture("key-gui/movement/d.png");
+
+        this.upTexture = assets.getTexture("key-gui/movement/arrow_up.png");
+        this.leftTexture = assets.getTexture("key-gui/movement/arrow_left.png");
+        this.downTexture = assets.getTexture("key-gui/movement/arrow_down.png");
+        this.rightTexture = assets.getTexture("key-gui/movement/arrow_right.png");
+
+        this.shiftTexture = assets.getTexture("key-gui/movement/shift.png");
+        this.pTexture = assets.getTexture("key-gui/settingKeys/p.png");
+        this.f3Texture = assets.getTexture("key-gui/settingKeys/f3.png");
     }
 
     public void renderWorldHealthBars(OutputManager output, Collection<Entity> entities, float interpolationAlpha) {
@@ -51,8 +75,8 @@ public final class GameHudRenderer {
     }
 
     public void renderUi(OutputManager output, CancerCell player, CancerEvolutionManager cancerManager,
-                         ChemoManager chemoManager, int infectedCells, int totalTargets,
-                         float elapsedSeconds, float winTimeSeconds, String progressPrompt) {
+            ChemoManager chemoManager, int infectedCells, int totalTargets,
+            float elapsedSeconds, float winTimeSeconds, String progressPrompt) {
         float uiWidth = output.getUiWidth();
         float uiHeight = output.getUiHeight();
 
@@ -92,14 +116,86 @@ public final class GameHudRenderer {
 
         font.setColor(Color.ORANGE);
         font.draw(output.getBatch(), chemoManager.isActive()
-                        ? "NEXT CHEMO: " + (int) chemoManager.getTimeUntilNextChemo() + "s"
-                        : "CHEMO: INACTIVE",
+                ? "NEXT CHEMO: " + (int) chemoManager.getTimeUntilNextChemo() + "s"
+                : "CHEMO: INACTIVE",
                 250f,
                 top - 44f);
 
         font.setColor(Color.YELLOW);
-        font.draw(output.getBatch(), progressPrompt, 20f, 36f);
-        font.draw(output.getBatch(), "MOVE: WASD / ARROWS   DASH: SHIFT   PAUSE: P", 20f, 62f);
+        // font.draw(output.getBatch(), progressPrompt, 20f, 36f);
+        // font.draw(output.getBatch(), "MOVE: WASD / ARROWS DASH: SHIFT PAUSE: P", 20f,
+        // 62f);
+
+        // progress prompt
+        float progressY = 56f;
+        font.draw(output.getBatch(), progressPrompt, 20f, progressY);
+
+        // horizontal movement row
+        float rowY = 64f;
+        float clusterIconSize = 24f;
+        float singleIconSize = 28f;
+        float gap = 4f;
+        float clusterWidth = (clusterIconSize * 3f) + (gap * 2f);
+        float spacing = 12f;
+
+        // calculate exact text widths to right-align entire block
+        GlyphLayout slashLayout = new GlyphLayout(font, "/");
+        GlyphLayout moveLayout = new GlyphLayout(font, "Move");
+        GlyphLayout dashLayout = new GlyphLayout(font, "Dash");
+
+        float shiftRatio = (float) shiftTexture.getWidth() / shiftTexture.getHeight();
+        float shiftWidth = singleIconSize * shiftRatio;
+
+        // total width of movement row
+        float movementRowWidth = clusterWidth + spacing + slashLayout.width + spacing + clusterWidth + spacing
+                + moveLayout.width + (spacing * 3f) + shiftWidth + 8f + dashLayout.width;
+
+        // anchor block to right side of screen (with 20px padding)
+        float blockStartX = uiWidth - movementRowWidth - 20f;
+
+        float currentX = blockStartX;
+        float textY = rowY + clusterIconSize + 2f;
+
+        // draw wasd
+        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, currentX, rowY, clusterIconSize);
+        currentX += clusterWidth + spacing;
+
+        // draw "/"
+        font.draw(output.getBatch(), slashLayout, currentX, textY);
+        currentX += slashLayout.width + spacing;
+
+        // draw arrows
+        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, currentX, rowY,
+                clusterIconSize);
+        currentX += clusterWidth + spacing;
+
+        // draw "Move"
+        font.draw(output.getBatch(), moveLayout, currentX, textY);
+        currentX += moveLayout.width + (spacing * 3f);
+
+        // draw "Dash"
+        output.getBatch().draw(shiftTexture, currentX, rowY + 6f, shiftWidth, singleIconSize);
+        currentX += shiftWidth + 8f;
+        font.draw(output.getBatch(), dashLayout, currentX, rowY + singleIconSize + 2f);
+
+        // f3 and pause row
+        float f3RowY = 24f;
+        // align left edge of this row with movement row above it to create a neat block
+        float bottomX = blockStartX;
+
+        // draw F3
+        output.getBatch().draw(f3Texture, bottomX, f3RowY, singleIconSize, singleIconSize);
+        bottomX += singleIconSize + 8f;
+
+        GlyphLayout f3Layout = new GlyphLayout(font, "Toggle hitboxes");
+        font.draw(output.getBatch(), f3Layout, bottomX, f3RowY + singleIconSize - 4f);
+        bottomX += f3Layout.width + 40f;
+
+        // draw "Pause"
+        output.getBatch().draw(pTexture, bottomX, f3RowY, singleIconSize, singleIconSize);
+        bottomX += singleIconSize + 8f;
+        font.draw(output.getBatch(), "Pause", bottomX, f3RowY + singleIconSize - 4f);
+
         output.endUi();
     }
 

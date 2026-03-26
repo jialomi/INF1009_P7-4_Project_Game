@@ -81,7 +81,8 @@ public class GameScene extends AbstractScene {
 
     @Override
     protected void onInitialise() {
-        hudRenderer = new GameHudRenderer();
+        // pass asset manager into hud so it can grab key textures
+        hudRenderer = new GameHudRenderer(getServices().getAssets());
         debugShapeRenderer = new ShapeRenderer();
         bgTexture = getServices().getAssets().getTexture("bg.png");
         wallTexture = getServices().getAssets().getTexture("wall_tile.png");
@@ -325,8 +326,10 @@ public class GameScene extends AbstractScene {
     }
 
     private void clampToArena(Entity entity) {
-        float x = Math.max(WORLD_MARGIN, Math.min(entity.getPositionX(), WORLD_WIDTH - WORLD_MARGIN - entity.getWidth()));
-        float y = Math.max(WORLD_MARGIN, Math.min(entity.getPositionY(), WORLD_HEIGHT - WORLD_MARGIN - entity.getHeight()));
+        float x = Math.max(WORLD_MARGIN,
+                Math.min(entity.getPositionX(), WORLD_WIDTH - WORLD_MARGIN - entity.getWidth()));
+        float y = Math.max(WORLD_MARGIN,
+                Math.min(entity.getPositionY(), WORLD_HEIGHT - WORLD_MARGIN - entity.getHeight()));
         entity.setPosition(x, y);
     }
 
@@ -444,7 +447,7 @@ public class GameScene extends AbstractScene {
 
     private String buildProgressPrompt() {
         return String.format(Locale.US,
-                "Spread through the organ. Infect cells, evade T-cells, survive %.0fs. F3 toggles hitboxes.",
+                "Spread through the organ. Infect cells, evade T-cells, survive %.0fs.",
                 WIN_TIME_SECONDS);
     }
 

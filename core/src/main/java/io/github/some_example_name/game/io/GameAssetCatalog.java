@@ -14,39 +14,23 @@ public final class GameAssetCatalog {
 
             // key gui - setting keys
             "key-gui/settingKeys/enter.png",
-            "key-gui/settingKeys/enter_outline.png",
             "key-gui/settingKeys/escape.png",
-            "key-gui/settingKeys/escape_outline.png",
             "key-gui/settingKeys/f3.png",
-            "key-gui/settingKeys/f3_outline.png",
             "key-gui/settingKeys/numpad_enter.png",
-            "key-gui/settingKeys/numpad_enter_outline.png",
             "key-gui/settingKeys/o.png",
-            "key-gui/settingKeys/o_outline.png",
             "key-gui/settingKeys/p.png",
-            "key-gui/settingKeys/p_outline.png",
             "key-gui/settingKeys/r.png",
-            "key-gui/settingKeys/r_outline.png",
 
             // Key GUI - Movement
             "key-gui/movement/a.png",
-            "key-gui/movement/a_outline.png",
             "key-gui/movement/arrow_down.png",
-            "key-gui/movement/arrow_down_outline.png",
             "key-gui/movement/arrow_left.png",
-            "key-gui/movement/arrow_left_outline.png",
             "key-gui/movement/arrow_right.png",
-            "key-gui/movement/arrow_right_outline.png",
             "key-gui/movement/arrow_up.png",
-            "key-gui/movement/arrow_up_outline.png",
             "key-gui/movement/d.png",
-            "key-gui/movement/d_outline.png",
             "key-gui/movement/s.png",
-            "key-gui/movement/s_outline.png",
             "key-gui/movement/shift.png",
-            "key-gui/movement/shift_outline.png",
             "key-gui/movement/w.png",
-            "key-gui/movement/w_outline.png"
     };
 
     private static final String[] SOUNDS = {
