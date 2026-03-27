@@ -51,7 +51,7 @@ public class StartScene extends AbstractScene {
 
         // -- CHANGES HERE --
         // Load your new thumbnail image. Replace path with where you saved it.
-        thumbnailTexture = new Texture("startscene.jpg");
+        thumbnailTexture = new Texture("images/scenes/startscene.jpg");
 
         // Key textures are loaded as before
         enterTexture = getServices().getAssets().getTexture("key-gui/settingKeys/enter.png");

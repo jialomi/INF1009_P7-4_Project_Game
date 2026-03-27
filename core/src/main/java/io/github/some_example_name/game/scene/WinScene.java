@@ -49,7 +49,7 @@ public class WinScene extends AbstractScene {
         font.setColor(new Color(0.9f, 0.7f, 1.0f, 1f)); // Light purple/pink to match the necrotic theme
 
         // -- NEW -- Load your background image
-        bgTexture = new Texture("winscene.jpg");
+        bgTexture = new Texture("images/scenes/winscene.jpg");
         
 
         // Randomly select one phrase when the scene loads

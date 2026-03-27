@@ -55,7 +55,7 @@ public class LoseScene extends AbstractScene {
 
         // -- CHANGES HERE --
         // Load the lose thumbnail texture. Make sure to assume assets directory etc.
-        thumbnailTexture = new Texture("losescene.jpg");
+        thumbnailTexture = new Texture("images/scenes/losescene.jpg");
 
         // Key textures are loaded as before
         rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");

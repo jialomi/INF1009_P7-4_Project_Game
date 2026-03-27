@@ -111,7 +111,7 @@ public final class GameHudRenderer {
                 top - 66f);
 
         font.setColor(new Color(0.85f, 0.35f, 1f, 1f));
-        font.draw(output.getBatch(), String.format(Locale.US, "SPREAD: %.1f%%", spread), 250f, top);
+        font.draw(output.getBatch(), "SPREAD: " + Math.round(spread) + "%", 250f, top);
         font.draw(output.getBatch(),
                 cancerManager.isTerminalStage() ? "STAGE: TERMINAL" : "STAGE: " + cancerManager.getCurrentStage(),
                 250f,

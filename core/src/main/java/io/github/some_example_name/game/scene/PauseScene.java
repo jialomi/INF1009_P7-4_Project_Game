@@ -42,7 +42,7 @@ public class PauseScene extends AbstractScene {
         font.setColor(Color.WHITE);
 
         // Load the artwork directly!
-        bgTexture = new Texture("pausescene.jpg");
+        bgTexture = new Texture("images/scenes/pausescene.jpg");
 
         pTexture = getServices().getAssets().getTexture("key-gui/settingKeys/p.png");
         rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");
