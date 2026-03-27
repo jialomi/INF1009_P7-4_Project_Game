@@ -154,7 +154,7 @@ public class GameScene extends AbstractScene {
         }
 
         // 2. You win if you fully infect the body OR if you survive the entire time limit
-        if (cancerManager.isBodyFullyInfected() || elapsedSeconds >= WIN_TIME_SECONDS) {
+        if (cancerManager.isBodyFullyInfected()) {
             winRun();
             return;
         }
