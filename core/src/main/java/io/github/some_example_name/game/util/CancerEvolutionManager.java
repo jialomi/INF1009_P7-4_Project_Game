@@ -30,6 +30,8 @@ public class CancerEvolutionManager {
     public boolean checkEvolution() {
         int previous = currentStage;
 
+        // Spread can move both directions because chemo is permanent once it starts,
+        // so stage is recomputed from the current percentage instead of only increasing.
         if (currentSpreadPercent >= TERMINAL_STAGE_THRESHOLD) {
             currentStage = 5;
         } else if (currentSpreadPercent >= STAGE_4_THRESHOLD) {

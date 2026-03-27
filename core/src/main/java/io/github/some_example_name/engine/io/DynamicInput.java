@@ -126,8 +126,6 @@ public class DynamicInput implements InputProcessor, Disposable {
         return true;
     }
 
-    // unused methods required by interface
-    // leave these empty because dont need them yet
     @Override
     public boolean touchUp(int x, int y, int p, int b) {
         return true;

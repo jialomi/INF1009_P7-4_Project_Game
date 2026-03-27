@@ -18,13 +18,10 @@ public class PauseScene extends AbstractScene {
     private final CellIOController ioController;
     private BitmapFont font;
 
-    // Load the sleeping monster!
     private Texture bgTexture; 
 
-    private Texture pTexture, rTexture, escTexture;
-    private Texture wTexture, aTexture, sTexture, dTexture;
-    private Texture upTexture, leftTexture, downTexture, rightTexture;
-    private Texture shiftTexture;
+    private PromptTextures prompts;
+    private MovementLegendTextures movement;
 
     public PauseScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
@@ -40,22 +37,8 @@ public class PauseScene extends AbstractScene {
         font.setColor(Color.WHITE);
 
         bgTexture = getServices().getAssets().getTexture("images/scenes/pausescene.jpg");
-
-        pTexture = getServices().getAssets().getTexture("key-gui/settingKeys/p.png");
-        rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");
-        escTexture = getServices().getAssets().getTexture("key-gui/settingKeys/escape.png");
-
-        wTexture = getServices().getAssets().getTexture("key-gui/movement/w.png");
-        aTexture = getServices().getAssets().getTexture("key-gui/movement/a.png");
-        sTexture = getServices().getAssets().getTexture("key-gui/movement/s.png");
-        dTexture = getServices().getAssets().getTexture("key-gui/movement/d.png");
-
-        upTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_up.png");
-        leftTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_left.png");
-        downTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_down.png");
-        rightTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_right.png");
-
-        shiftTexture = getServices().getAssets().getTexture("key-gui/movement/shift.png");
+        prompts = PromptTextures.load(getServices());
+        movement = MovementLegendTextures.load(getServices());
     }
 
     @Override
@@ -82,10 +65,8 @@ public class PauseScene extends AbstractScene {
         float cx = screenW / 2f;
         float cy = screenH / 2f;
 
-        // 1. Draw the sleeping tumor full screen
         SceneUiSupport.drawFullscreenBackground(output, bgTexture, screenW, screenH, new Color(0.5f, 0.5f, 0.5f, 1f));
 
-        // 2. PAUSE MENU
         font.getData().setScale(2.0f);
         font.setColor(Color.YELLOW);
         SceneUiSupport.drawCentered(output, font, "GAME PAUSED", cx, cy + 120f);
@@ -95,20 +76,16 @@ public class PauseScene extends AbstractScene {
         SceneUiSupport.drawDivider(output, font, cx, cy + 70f);
 
         float menuStartX = cx - 110f; 
-        UIUtils.drawPromptLeftAligned(output, font, pTexture, "[P] RESUME", menuStartX, cy + 10f);
-        UIUtils.drawPromptLeftAligned(output, font, rTexture, "[R] RESTART", menuStartX, cy - 40f);
-        UIUtils.drawPromptLeftAligned(output, font, escTexture, "[ESC] MAIN MENU", menuStartX, cy - 90f);
+        UIUtils.drawPromptLeftAligned(output, font, prompts.p, "[P] RESUME", menuStartX, cy + 10f);
+        UIUtils.drawPromptLeftAligned(output, font, prompts.r, "[R] RESTART", menuStartX, cy - 40f);
+        UIUtils.drawPromptLeftAligned(output, font, prompts.escape, "[ESC] MAIN MENU", menuStartX, cy - 90f);
         
         SceneUiSupport.drawDivider(output, font, cx, cy - 130f);
 
-        // 3. CONTROLS
         font.getData().setScale(1.0f);
         font.setColor(Color.LIGHT_GRAY);
         
-        SceneUiSupport.drawMovementAndActionLegend(output, font,
-                wTexture, aTexture, sTexture, dTexture,
-                upTexture, leftTexture, downTexture, rightTexture,
-                shiftTexture, pTexture, "Resume", "[P]", screenW);
+        SceneUiSupport.drawMovementAndActionLegend(output, font, movement, prompts.p, "Resume", "[P]", screenW);
 
         output.endUi();
         output.endFrame();

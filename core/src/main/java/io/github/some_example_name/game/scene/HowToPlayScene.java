@@ -21,17 +21,8 @@ public class HowToPlayScene extends AbstractScene {
 
     private BitmapFont titleFont;
     private BitmapFont bodyFont;
-    private Texture enterTexture;
-    private Texture escTexture;
-    private Texture shiftTexture;
-    private Texture wTexture;
-    private Texture aTexture;
-    private Texture sTexture;
-    private Texture dTexture;
-    private Texture upTexture;
-    private Texture leftTexture;
-    private Texture downTexture;
-    private Texture rightTexture;
+    private PromptTextures prompts;
+    private MovementLegendTextures movement;
     private TextureRegion tumorPreview;
     private TextureRegion healthyCellPreview;
     private TextureRegion tCellPreview;
@@ -54,20 +45,8 @@ public class HowToPlayScene extends AbstractScene {
         bodyFont = new BitmapFont();
         bodyFont.getData().setScale(1.05f);
         bodyFont.setColor(Color.LIGHT_GRAY);
-
-        enterTexture = getServices().getAssets().getTexture("key-gui/settingKeys/enter.png");
-        escTexture = getServices().getAssets().getTexture("key-gui/settingKeys/escape.png");
-        shiftTexture = getServices().getAssets().getTexture("key-gui/movement/shift.png");
-
-        wTexture = getServices().getAssets().getTexture("key-gui/movement/w.png");
-        aTexture = getServices().getAssets().getTexture("key-gui/movement/a.png");
-        sTexture = getServices().getAssets().getTexture("key-gui/movement/s.png");
-        dTexture = getServices().getAssets().getTexture("key-gui/movement/d.png");
-
-        upTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_up.png");
-        leftTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_left.png");
-        downTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_down.png");
-        rightTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_right.png");
+        prompts = PromptTextures.load(getServices());
+        movement = MovementLegendTextures.load(getServices());
 
         Texture cancerSheet = getServices().getAssets().getTexture("images/cancer_cell.png");
         Texture normalCellTexture = getServices().getAssets().getTexture("images/Normal_cell.png");
@@ -80,7 +59,7 @@ public class HowToPlayScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
-        ioController.getAudioHandler().setMenuBGM();
+        SceneUiSupport.ensureMenuMusic(ioController);
         CellInputMapper mapper = ioController.getInputMapper();
         if (mapper.checkConfirmAction()) {
             SceneFlow.restartGame(sceneManager, getServices(), ioController);
@@ -134,20 +113,20 @@ public class HowToPlayScene extends AbstractScene {
         bodyFont.draw(output.getBatch(), "CONTROLS", leftX, controlsTop);
 
         float iconSize = 36f;
-        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, leftX, controlsTop - 120f, iconSize);
-        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, leftX + 165f,
+        UIUtils.drawKeyCluster(output, movement.w, movement.a, movement.s, movement.d, leftX, controlsTop - 120f, iconSize);
+        UIUtils.drawKeyCluster(output, movement.up, movement.left, movement.down, movement.right, leftX + 165f,
                 controlsTop - 120f, iconSize);
 
         bodyFont.setColor(Color.LIGHT_GRAY);
         bodyFont.draw(output.getBatch(), "Move the tumor cell", leftX + 325f, controlsTop - 68f);
 
         float shiftY = controlsTop - 170f;
-        UIUtils.drawPromptLeftAligned(output, bodyFont, shiftTexture, "[SHIFT] Dash through danger", leftX, shiftY);
+        UIUtils.drawPromptLeftAligned(output, bodyFont, movement.shift, "[SHIFT] Dash through danger", leftX, shiftY);
 
         float footerY = 92f;
         bodyFont.setColor(Color.YELLOW);
-        UIUtils.drawPromptCentered(output, bodyFont, enterTexture, "START RUN", cx - 135f, footerY);
-        UIUtils.drawPromptCentered(output, bodyFont, escTexture, "BACK TO TITLE", cx + 135f, footerY);
+        UIUtils.drawPromptCentered(output, bodyFont, prompts.enter, "START RUN", cx - 135f, footerY);
+        UIUtils.drawPromptCentered(output, bodyFont, prompts.escape, "BACK TO TITLE", cx + 135f, footerY);
 
         output.endUi();
         output.endFrame();

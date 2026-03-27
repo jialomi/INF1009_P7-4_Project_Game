@@ -18,18 +18,14 @@ public final class UIUtils {
     public static void drawPromptCentered(OutputManager output, BitmapFont font, Texture icon, String text, float cx,
             float y) {
         float baseHeight = 44f;
-
-        // auto width: read image's real proportions so wide keys arent squished
-        float aspectRatio = (float) icon.getWidth() / (float) icon.getHeight();
-        float drawWidth = baseHeight * aspectRatio;
+        float drawWidth = getPromptIconWidth(icon, baseHeight);
 
         GlyphLayout layout = new GlyphLayout(font, text);
         float spacing = 12f;
         float totalWidth = drawWidth + spacing + layout.width;
         float startX = cx - (totalWidth / 2f);
 
-        // draw image slightly below text baseline for vertical alignment
-        output.getBatch().draw(icon, startX, y - (baseHeight * 0.75f), drawWidth, baseHeight);
+        drawPromptIcon(output, icon, startX, y, drawWidth, baseHeight);
         font.draw(output.getBatch(), layout, startX + drawWidth + spacing, y);
     }
 
@@ -57,18 +53,24 @@ public final class UIUtils {
     public static void drawPromptLeftAligned(OutputManager output, BitmapFont font, Texture icon, String text,
             float startX, float y) {
         float baseHeight = 44f;
-
-        // auto width
-        float aspectRatio = (float) icon.getWidth() / (float) icon.getHeight();
-        float drawWidth = baseHeight * aspectRatio;
+        float drawWidth = getPromptIconWidth(icon, baseHeight);
 
         float spacing = 12f;
 
-        // draw image slightly below text baseline for vertical alignment
-        output.getBatch().draw(icon, startX, y - (baseHeight * 0.75f), drawWidth, baseHeight);
+        drawPromptIcon(output, icon, startX, y, drawWidth, baseHeight);
 
         // draw text immediately after icon + spacing
         GlyphLayout layout = new GlyphLayout(font, text);
         font.draw(output.getBatch(), layout, startX + drawWidth + spacing, y);
+    }
+
+    private static float getPromptIconWidth(Texture icon, float baseHeight) {
+        float aspectRatio = (float) icon.getWidth() / (float) icon.getHeight();
+        return baseHeight * aspectRatio;
+    }
+
+    private static void drawPromptIcon(OutputManager output, Texture icon, float x, float y, float width,
+            float height) {
+        output.getBatch().draw(icon, x, y - (height * 0.75f), width, height);
     }
 }

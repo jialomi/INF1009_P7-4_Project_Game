@@ -19,11 +19,8 @@ public class StartScene extends AbstractScene {
 
     private Texture thumbnailTexture;
 
-    private Texture wTexture, aTexture, sTexture, dTexture;
-    private Texture upTexture, leftTexture, downTexture, rightTexture;
-    private Texture enterTexture;
-    private Texture shiftTexture;
-    private Texture pTexture;
+    private PromptTextures prompts;
+    private MovementLegendTextures movement;
 
     public StartScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
@@ -38,26 +35,13 @@ public class StartScene extends AbstractScene {
         mainFont = new BitmapFont();
         mainFont.setColor(Color.LIGHT_GRAY);
         thumbnailTexture = getServices().getAssets().getTexture("images/scenes/startscene.jpg");
-
-        // Key textures are loaded as before
-        enterTexture = getServices().getAssets().getTexture("key-gui/settingKeys/enter.png");
-        pTexture = getServices().getAssets().getTexture("key-gui/settingKeys/p.png");
-        shiftTexture = getServices().getAssets().getTexture("key-gui/movement/shift.png");
-
-        wTexture = getServices().getAssets().getTexture("key-gui/movement/w.png");
-        aTexture = getServices().getAssets().getTexture("key-gui/movement/a.png");
-        sTexture = getServices().getAssets().getTexture("key-gui/movement/s.png");
-        dTexture = getServices().getAssets().getTexture("key-gui/movement/d.png");
-
-        upTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_up.png");
-        leftTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_left.png");
-        downTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_down.png");
-        rightTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_right.png");
+        prompts = PromptTextures.load(getServices());
+        movement = MovementLegendTextures.load(getServices());
     }
 
     @Override
     protected void onUpdate(float delta) {
-        ioController.getAudioHandler().setMenuBGM();
+        SceneUiSupport.ensureMenuMusic(ioController);
         if (ioController.getInputMapper().checkConfirmAction()) {
             SceneFlow.goToHowTo(sceneManager);
         }
@@ -74,14 +58,8 @@ public class StartScene extends AbstractScene {
         float cx = screenW / 2f;
         float cy = screenH / 2f;
 
-        // ---------------------------------------------------------
-        // 1. FULL SCREEN BACKGROUND
-        // ---------------------------------------------------------
         SceneUiSupport.drawFullscreenBackground(output, thumbnailTexture, screenW, screenH, Color.WHITE);
 
-        // ---------------------------------------------------------
-        // 2. CENTERED LORE TEXT (Right below the title)
-        // ---------------------------------------------------------
         mainFont.getData().setScale(1.2f);
         mainFont.setColor(Color.WHITE);
         float descTop = cy + 45f; 
@@ -95,14 +73,11 @@ public class StartScene extends AbstractScene {
         mainFont.getData().setScale(2.1f); 
         mainFont.setColor(Color.YELLOW); 
         float enterY = descTop - (lineSpace * 2f) - 200f; 
-        UIUtils.drawPromptCentered(output, mainFont, enterTexture, "VIEW BRIEFING", cx, enterY);
+        UIUtils.drawPromptCentered(output, mainFont, prompts.enter, "VIEW BRIEFING", cx, enterY);
         mainFont.getData().setScale(1.0f);
         mainFont.setColor(Color.LIGHT_GRAY);
         
-        SceneUiSupport.drawMovementAndActionLegend(output, mainFont,
-                wTexture, aTexture, sTexture, dTexture,
-                upTexture, leftTexture, downTexture, rightTexture,
-                shiftTexture, pTexture, "Pause", "[P]", screenW);
+        SceneUiSupport.drawMovementAndActionLegend(output, mainFont, movement, prompts.p, "Pause", "[P]", screenW);
 
         output.endUi();
         output.endFrame();

@@ -21,6 +21,11 @@ import io.github.some_example_name.game.entity.TCell;
 import io.github.some_example_name.game.util.CancerEvolutionManager;
 import io.github.some_example_name.game.util.WaveManager;
 
+/**
+ * Owns non-player world management for the active run.
+ * This keeps spawning, balance-driven NPC updates, and arena housekeeping
+ * out of {@link GameScene}, which mainly orchestrates high-level flow.
+ */
 final class GameWorldSystem {
     private final AbstractScene scene;
     private final WaveManager waveManager;
@@ -58,6 +63,8 @@ final class GameWorldSystem {
         float stageSpeed = GameBalanceConfig.getTCellSpeed(cancerManager.getCurrentStage());
         float healthySpeed = GameBalanceConfig.getHealthyCellSpeed(cancerManager.getCurrentStage());
         float healthyFleeRange = GameBalanceConfig.getHealthyCellFleeRange(cancerManager.getCurrentStage());
+        // Existing NPCs are updated live so stage changes immediately affect
+        // pressure and evasiveness instead of only applying to fresh spawns.
         for (Entity entity : scene.getEntities()) {
             if (!entity.isActive()) {
                 continue;
@@ -132,6 +139,8 @@ final class GameWorldSystem {
             }
 
             TCell tCell = (TCell) entity;
+            // Only recycle stragglers that are no longer contributing pressure.
+            // Active pursuers stay in the world so the AI does not feel fake.
             if (tCell.isPursuingTarget() || !tCell.isIneffectiveForTooLong() || !isNearArenaEdge(tCell)) {
                 continue;
             }
@@ -200,6 +209,8 @@ final class GameWorldSystem {
         float speed = GameBalanceConfig.getHealthyCellSpeed(cancerManager.getCurrentStage());
         float fleeRange = GameBalanceConfig.getHealthyCellFleeRange(cancerManager.getCurrentStage());
 
+        // The game maintains a live population target instead of discrete waves.
+        // This lets chemo reduce progress without making the run unwinnable.
         for (int i = 0; i < spawnCount; i++) {
             NormalCell cell = CellFactory.createNormalCell(0f, 0f, speed, fleeRange);
             placeEntityAtSpawn(cell, GameBalanceConfig.NORMAL_CELL_MIN_PLAYER_DISTANCE);
@@ -298,6 +309,8 @@ final class GameWorldSystem {
             if (!(existing instanceof GameEntity) || !existing.isActive()) {
                 continue;
             }
+            // Query padding is reused here so new spawns do not appear clipped
+            // into another entity even when their actual hitboxes are smaller.
             if (((GameEntity) existing).getBounds().overlaps(queryArea)) {
                 return false;
             }

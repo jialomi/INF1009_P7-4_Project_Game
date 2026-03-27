@@ -9,9 +9,7 @@ import io.github.some_example_name.engine.scene.AbstractScene;
 import io.github.some_example_name.engine.scene.SceneManager;
 import io.github.some_example_name.game.io.CellIOController;
 import io.github.some_example_name.game.io.CellInputMapper;
-import io.github.some_example_name.game.util.RunStats;
 import io.github.some_example_name.game.util.SceneFlow;
-import io.github.some_example_name.game.util.UIUtils;
 
 public class LoseScene extends AbstractScene {
 
@@ -20,10 +18,9 @@ public class LoseScene extends AbstractScene {
     private BitmapFont font;
     private String headerText;
 
-    private Texture rTexture, escTexture, oTexture;
+    private PromptTextures prompts;
     private Texture thumbnailTexture;
 
-    // The rotating phrases for when the tumor is defeated
     private final String[] losePhrases = {
             "THE HOST SURVIVES.",
             "VITAL SYSTEMS STABILISED",
@@ -45,10 +42,7 @@ public class LoseScene extends AbstractScene {
         font.setColor(new Color(0.2f, 0.8f, 0.4f, 1f)); 
         thumbnailTexture = getServices().getAssets().getTexture("images/scenes/losescene.jpg");
 
-        rTexture = getServices().getAssets().getTexture("key-gui/settingKeys/r.png");
-        escTexture = getServices().getAssets().getTexture("key-gui/settingKeys/escape.png");
-        oTexture = getServices().getAssets().getTexture("key-gui/settingKeys/o.png");
-
+        prompts = PromptTextures.load(getServices());
         headerText = losePhrases[(int) (Math.random() * losePhrases.length)];
     }
 
@@ -70,55 +64,8 @@ public class LoseScene extends AbstractScene {
         OutputManager output = getServices().getOutputManager();
         output.beginFrame();
         output.beginUi();
-
-        float screenW = output.getUiWidth();
-        float screenH = output.getUiHeight();
-        SceneUiSupport.drawFullscreenBackground(output, thumbnailTexture, screenW, screenH, Color.WHITE);
-
-        float cx = screenW / 2f;
-        float cy = screenH / 2f;
-
-        float currentY = cy + 150f;
-        float spacingMedium = 55f;
-        float spacingSmall = 45f;
-        float spacingPrompts = 55f;
-        float spacingDonation = 50f;
-
-        font.setColor(new Color(0.2f, 0.8f, 0.4f, 1f));
-        SceneUiSupport.drawCentered(output, font, headerText, cx, currentY);
-        
-        currentY -= spacingMedium; 
-        font.setColor(Color.WHITE);
-        SceneUiSupport.drawDivider(output, font, cx, currentY);
-        
-        currentY -= spacingMedium; 
-        SceneUiSupport.drawCentered(output, font, "SCORE: " + RunStats.getLastScore(), cx, currentY);
-        
-        currentY -= spacingSmall; 
-        SceneUiSupport.drawCentered(output, font, "CELLS INFECTED: " + RunStats.getLastInfectedCells(), cx, currentY);
-        
-        currentY -= spacingSmall; 
-        SceneUiSupport.drawCentered(output,
-                font,
-                "FINAL SPREAD: " + Math.round(RunStats.getLastSpreadPercent()) + "%   LEVEL: " + RunStats.getLastLevel(),
-                cx,
-                currentY);
-        
-        currentY -= spacingMedium; 
-        SceneUiSupport.drawDivider(output, font, cx, currentY);
-
-        currentY -= spacingSmall;
-        SceneUiSupport.drawCentered(output,
-                font,
-                "TIME: " + String.format("%.1fs   BEST SCORE: %d", RunStats.getLastSurvivalSeconds(), RunStats.getBestScore()),
-                cx,
-                currentY);
-        
-        float promptY = currentY - spacingPrompts;
-        UIUtils.drawPromptCentered(output, font, rTexture, "[R] PLAY AGAIN", cx - 140f, promptY);
-        UIUtils.drawPromptCentered(output, font, escTexture, "[ESC] MENU", cx + 140f, promptY);
-        
-        UIUtils.drawPromptCentered(output, font, oTexture, "[O] OPEN DONATION PAGE", cx, promptY - spacingDonation);
+        ResultSceneSupport.render(output, font, thumbnailTexture, Color.WHITE, headerText,
+                new Color(0.2f, 0.8f, 0.4f, 1f), prompts);
 
         output.endUi();
         output.endFrame();

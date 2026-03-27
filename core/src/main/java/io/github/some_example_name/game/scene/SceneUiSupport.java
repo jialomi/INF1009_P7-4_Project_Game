@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 import io.github.some_example_name.engine.io.OutputManager;
+import io.github.some_example_name.game.io.CellIOController;
 import io.github.some_example_name.game.util.UIUtils;
 
 final class SceneUiSupport {
@@ -27,10 +28,14 @@ final class SceneUiSupport {
         drawCentered(output, font, "- - - - - - - - - - - -", cx, y);
     }
 
+    static void ensureMenuMusic(CellIOController ioController) {
+        // Menu scenes call this every frame; the audio layer already suppresses
+        // restarting the same track, so this is an API to keep desired state.
+        ioController.getAudioHandler().setMenuBGM();
+    }
+
     static void drawMovementAndActionLegend(OutputManager output, BitmapFont font,
-            Texture wTexture, Texture aTexture, Texture sTexture, Texture dTexture,
-            Texture upTexture, Texture leftTexture, Texture downTexture, Texture rightTexture,
-            Texture shiftTexture, Texture actionTexture, String actionLabel, String actionKeyLabel,
+            MovementLegendTextures movement, Texture actionTexture, String actionLabel, String actionKeyLabel,
             float screenW) {
         float iconSize = 40f;
         float keysBaseY = 30f;
@@ -39,12 +44,13 @@ final class SceneUiSupport {
 
         float leftX = 40f;
         font.draw(output.getBatch(), "MOVEMENT:", leftX, labelY);
-        UIUtils.drawKeyCluster(output, wTexture, aTexture, sTexture, dTexture, leftX, keysBaseY, iconSize);
-        UIUtils.drawKeyCluster(output, upTexture, leftTexture, downTexture, rightTexture, leftX + 160f, keysBaseY, iconSize);
+        UIUtils.drawKeyCluster(output, movement.w, movement.a, movement.s, movement.d, leftX, keysBaseY, iconSize);
+        UIUtils.drawKeyCluster(output, movement.up, movement.left, movement.down, movement.right, leftX + 160f,
+                keysBaseY, iconSize);
 
         float rightX = screenW - 250f;
         font.draw(output.getBatch(), "ACTIONS:", rightX, labelY);
-        output.getBatch().draw(shiftTexture, rightX, keysTopY, iconSize, iconSize);
+        output.getBatch().draw(movement.shift, rightX, keysTopY, iconSize, iconSize);
         font.draw(output.getBatch(), "[SHIFT] Dash", rightX + iconSize + 10f, keysTopY + 25f);
         output.getBatch().draw(actionTexture, rightX, keysBaseY, iconSize, iconSize);
         font.draw(output.getBatch(), actionKeyLabel + " " + actionLabel, rightX + iconSize + 10f, keysBaseY + 25f);
