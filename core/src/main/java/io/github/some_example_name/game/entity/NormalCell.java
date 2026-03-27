@@ -14,8 +14,8 @@ public class NormalCell extends GameEntity {
 
     private final HealthBar healthBar;
     private final MovementManager movementManager;
-    private final float speed;
-    private final float fleeRange;
+    private float speed;
+    private float fleeRange;
     private Vector2 wanderDir;
     private float wanderTimer;
     private float startupDelay;
@@ -88,5 +88,10 @@ public class NormalCell extends GameEntity {
 
     public void setThreat(CancerCell threat) {
         this.threat = threat;
+    }
+
+    public void setMovementProfile(float speed, float fleeRange) {
+        this.speed = Math.max(0f, speed);
+        this.fleeRange = Math.max(0f, fleeRange);
     }
 }

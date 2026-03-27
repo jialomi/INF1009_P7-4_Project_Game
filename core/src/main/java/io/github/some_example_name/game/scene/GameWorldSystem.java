@@ -56,11 +56,18 @@ final class GameWorldSystem {
     void updateTCellAggression() {
         float aggression = GameBalanceConfig.getTCellAggressionForSpread(cancerManager.getCurrentSpreadPercent());
         float stageSpeed = GameBalanceConfig.getTCellSpeed(cancerManager.getCurrentStage());
+        float healthySpeed = GameBalanceConfig.getHealthyCellSpeed(cancerManager.getCurrentStage());
+        float healthyFleeRange = GameBalanceConfig.getHealthyCellFleeRange(cancerManager.getCurrentStage());
         for (Entity entity : scene.getEntities()) {
-            if (entity instanceof TCell && entity.isActive()) {
+            if (!entity.isActive()) {
+                continue;
+            }
+            if (entity instanceof TCell) {
                 TCell tCell = (TCell) entity;
                 tCell.setAggressionLevel(aggression);
                 tCell.setBaseSpeed(stageSpeed);
+            } else if (entity instanceof NormalCell) {
+                ((NormalCell) entity).setMovementProfile(healthySpeed, healthyFleeRange);
             }
         }
     }

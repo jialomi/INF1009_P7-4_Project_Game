@@ -34,14 +34,6 @@ public final class UIUtils {
     }
 
     /**
-     * draws standard text centered at given x coordinate
-     */
-    public static void drawTextCentered(OutputManager output, BitmapFont font, String text, float cx, float y) {
-        GlyphLayout layout = new GlyphLayout(font, text);
-        font.draw(output.getBatch(), layout, cx - (layout.width / 2f), y);
-    }
-
-    /**
      * draws a 4-key directional cluster (like wasd or arrows) in keyboard layout
      * startX and startY represents bottom-left corner of entire cluster
      */
