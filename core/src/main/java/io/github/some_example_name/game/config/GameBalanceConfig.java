@@ -12,6 +12,9 @@ public final class GameBalanceConfig {
     public static final float TCELL_MIN_PLAYER_DISTANCE = 220.0f;
     public static final float TCELL_SEPARATION_RADIUS = 45.0f;
     public static final float TCELL_SEPARATION_STRENGTH = 50.0f;
+    public static final float TCELL_RECYCLE_DISTANCE = 900.0f;
+    public static final float TCELL_RECYCLE_SECONDS = 10.0f;
+    public static final float TCELL_RECYCLE_EDGE_MARGIN = 180.0f;
     public static final float SPREAD_PER_HEALTHY_CELL = 1.0f;
 
     private GameBalanceConfig() {

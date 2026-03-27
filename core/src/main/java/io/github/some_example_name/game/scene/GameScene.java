@@ -128,6 +128,7 @@ public class GameScene extends AbstractScene {
         worldSystem.updateTCellAggression();
         worldSystem.applyTCellSeparation(delta);
         worldSystem.clampNpcEntities();
+        worldSystem.recycleIneffectiveTCells();
         worldSystem.removeInactiveEntities();
         worldSystem.updateSpawning(delta);
 

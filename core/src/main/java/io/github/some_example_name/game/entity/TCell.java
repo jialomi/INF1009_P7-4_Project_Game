@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import io.github.some_example_name.engine.collision.Collidable;
 import io.github.some_example_name.engine.movement.MovementManager;
+import io.github.some_example_name.game.config.GameBalanceConfig;
 import io.github.some_example_name.game.movement.NpcBehaviour;
 
 public class TCell extends GameEntity {
@@ -21,7 +22,7 @@ public class TCell extends GameEntity {
     private final HealthBar healthBar;
     private final Animation<TextureRegion> walkAnimation;
     private final MovementManager movementManager;
-    private final float speed;
+    private float speed;
     private final PursuitMode pursuitMode;
 
     private float animationTime = 0f;
@@ -30,6 +31,7 @@ public class TCell extends GameEntity {
     private CancerCell target;
     private boolean pursuingTarget;
     private float aggressionLevel;
+    private float ineffectiveSeconds;
 
     private enum PursuitMode {
         DIRECT(0f),
@@ -82,6 +84,12 @@ public class TCell extends GameEntity {
             pursuingTarget = false;
         }
 
+        if (!pursuingTarget && targetDistance >= GameBalanceConfig.TCELL_RECYCLE_DISTANCE) {
+            ineffectiveSeconds += deltaTime;
+        } else {
+            ineffectiveSeconds = 0f;
+        }
+
         if (pursuingTarget && target != null) {
             pursueTarget(deltaTime);
         } else {
@@ -95,6 +103,10 @@ public class TCell extends GameEntity {
 
     public void setAggressionLevel(float aggressionLevel) {
         this.aggressionLevel = Math.max(0f, Math.min(1f, aggressionLevel));
+    }
+
+    public void setBaseSpeed(float speed) {
+        this.speed = Math.max(0f, speed);
     }
 
     @Override
@@ -123,6 +135,14 @@ public class TCell extends GameEntity {
 
     public TextureRegion getCurrentTexture() {
         return texture;
+    }
+
+    public boolean isPursuingTarget() {
+        return pursuingTarget;
+    }
+
+    public boolean isIneffectiveForTooLong() {
+        return ineffectiveSeconds >= GameBalanceConfig.TCELL_RECYCLE_SECONDS;
     }
 
     private float distanceToTarget() {

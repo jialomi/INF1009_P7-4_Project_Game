@@ -55,9 +55,12 @@ final class GameWorldSystem {
 
     void updateTCellAggression() {
         float aggression = GameBalanceConfig.getTCellAggressionForSpread(cancerManager.getCurrentSpreadPercent());
+        float stageSpeed = GameBalanceConfig.getTCellSpeed(cancerManager.getCurrentStage());
         for (Entity entity : scene.getEntities()) {
             if (entity instanceof TCell && entity.isActive()) {
-                ((TCell) entity).setAggressionLevel(aggression);
+                TCell tCell = (TCell) entity;
+                tCell.setAggressionLevel(aggression);
+                tCell.setBaseSpeed(stageSpeed);
             }
         }
     }
@@ -112,6 +115,26 @@ final class GameWorldSystem {
                 clampToArena(entity);
             }
         }
+    }
+
+    void recycleIneffectiveTCells() {
+        List<UUID> recycled = new ArrayList<>();
+        for (Entity entity : scene.getEntities()) {
+            if (!(entity instanceof TCell) || !entity.isActive()) {
+                continue;
+            }
+
+            TCell tCell = (TCell) entity;
+            if (tCell.isPursuingTarget() || !tCell.isIneffectiveForTooLong() || !isNearArenaEdge(tCell)) {
+                continue;
+            }
+            recycled.add(tCell.getId());
+        }
+
+        for (UUID id : recycled) {
+            scene.removeEntity(id);
+        }
+        spawnReplacementTCells(recycled.size());
     }
 
     void removeInactiveEntities() {
@@ -204,6 +227,18 @@ final class GameWorldSystem {
             }
         }
         return count;
+    }
+
+    private boolean isNearArenaEdge(Entity entity) {
+        float left = entity.getPositionX();
+        float right = entity.getPositionX() + entity.getWidth();
+        float bottom = entity.getPositionY();
+        float top = entity.getPositionY() + entity.getHeight();
+        float edgeMargin = GameBalanceConfig.TCELL_RECYCLE_EDGE_MARGIN;
+        return left <= GameBalanceConfig.WORLD_MARGIN + edgeMargin
+                || right >= GameBalanceConfig.WORLD_WIDTH - GameBalanceConfig.WORLD_MARGIN - edgeMargin
+                || bottom <= GameBalanceConfig.WORLD_MARGIN + edgeMargin
+                || top >= GameBalanceConfig.WORLD_HEIGHT - GameBalanceConfig.WORLD_MARGIN - edgeMargin;
     }
 
     private void placeEntityAtSpawn(GameEntity entity, float minDistanceFromPlayer) {

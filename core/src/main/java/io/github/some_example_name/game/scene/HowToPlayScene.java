@@ -3,6 +3,8 @@ package io.github.some_example_name.game.scene;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Align;
 
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
@@ -30,6 +32,9 @@ public class HowToPlayScene extends AbstractScene {
     private Texture leftTexture;
     private Texture downTexture;
     private Texture rightTexture;
+    private TextureRegion tumorPreview;
+    private TextureRegion healthyCellPreview;
+    private TextureRegion tCellPreview;
 
     public HowToPlayScene(SceneManager sceneManager, EngineServices services, CellIOController ioController) {
         super(services);
@@ -63,6 +68,14 @@ public class HowToPlayScene extends AbstractScene {
         leftTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_left.png");
         downTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_down.png");
         rightTexture = getServices().getAssets().getTexture("key-gui/movement/arrow_right.png");
+
+        Texture cancerSheet = getServices().getAssets().getTexture("images/cancer_cell.png");
+        Texture normalCellTexture = getServices().getAssets().getTexture("images/Normal_cell.png");
+        Texture tCellSheet = getServices().getAssets().getTexture("images/tcell_strip.png");
+
+        tumorPreview = new TextureRegion(cancerSheet, 0, 0, cancerSheet.getWidth() / 4, cancerSheet.getHeight());
+        healthyCellPreview = new TextureRegion(normalCellTexture);
+        tCellPreview = new TextureRegion(tCellSheet, 0, 0, 64, 64);
     }
 
     @Override
@@ -93,6 +106,7 @@ public class HowToPlayScene extends AbstractScene {
 
         float leftX = 90f;
         float textX = 120f;
+        float rightColumnX = uiWidth * 0.58f;
         float lineY = uiHeight - 125f;
         float lineGap = 42f;
 
@@ -105,7 +119,17 @@ public class HowToPlayScene extends AbstractScene {
         bodyFont.draw(output.getBatch(), "Terminal stage begins at 90% spread. T-cells can no longer harm you there.",
                 textX, lineY - lineGap * 4f);
 
-        float controlsTop = uiHeight - 360f;
+        float spriteSectionTop = uiHeight - 125f;
+        bodyFont.setColor(Color.WHITE);
+        bodyFont.draw(output.getBatch(), "KEY ACTORS", rightColumnX, spriteSectionTop);
+        drawEntityGuide(output, rightColumnX + 18f, spriteSectionTop - 72f, tumorPreview, 62f,
+                "Tumor Cell", "You control this cell. Infect tissue, grow stronger, and survive.");
+        drawEntityGuide(output, rightColumnX + 18f, spriteSectionTop - 178f, healthyCellPreview, 44f,
+                "Healthy Cell", "Consume these to gain spread, recover 5 HP, and earn EXP.");
+        drawEntityGuide(output, rightColumnX + 18f, spriteSectionTop - 284f, tCellPreview, 54f,
+                "T-Cell", "Immune hunter. Avoid contact until terminal stage shuts them down.");
+
+        float controlsTop = uiHeight - 390f;
         bodyFont.setColor(Color.WHITE);
         bodyFont.draw(output.getBatch(), "CONTROLS", leftX, controlsTop);
 
@@ -137,5 +161,17 @@ public class HowToPlayScene extends AbstractScene {
         if (bodyFont != null) {
             bodyFont.dispose();
         }
+    }
+
+    private void drawEntityGuide(OutputManager output, float x, float y, TextureRegion sprite, float size,
+            String title, String description) {
+        float spriteBoxSize = 68f;
+        float spriteX = x + (spriteBoxSize - size) * 0.5f;
+        float spriteY = y - spriteBoxSize + (spriteBoxSize - size) * 0.5f + 10f;
+        output.getBatch().draw(sprite, spriteX, spriteY, size, size);
+        bodyFont.setColor(Color.WHITE);
+        bodyFont.draw(output.getBatch(), title, x + 84f, y);
+        bodyFont.setColor(Color.LIGHT_GRAY);
+        bodyFont.draw(output.getBatch(), description, x + 84f, y - 34f, 300f, Align.left, true);
     }
 }
