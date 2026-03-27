@@ -14,6 +14,10 @@ public final class SceneFlow {
         sm.setActive("game");
     }
 
+    public static void goToHowTo(SceneManager sm) {
+        sm.setActive("howto");
+    }
+
     public static void goToStart(SceneManager sm) {
         sm.setActive("start");
     }

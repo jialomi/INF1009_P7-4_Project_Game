@@ -71,8 +71,9 @@ public class StartScene extends AbstractScene {
 
     @Override
     protected void onUpdate(float delta) {
+        ioController.getAudioHandler().setMenuBGM();
         if (ioController.getInputMapper().checkConfirmAction()) {
-            SceneFlow.restartGame(sceneManager, getServices(), ioController);
+            SceneFlow.goToHowTo(sceneManager);
         }
     }
 
@@ -117,7 +118,7 @@ public class StartScene extends AbstractScene {
         // DYNAMIC POSITIONING: Increased the drop from -60f to -80f so the 
         // bigger text doesn't bump into the paragraph above it!
         float enterY = descTop - (lineSpace * 2f) - 200f; 
-        UIUtils.drawPromptCentered(output, mainFont, enterTexture, "BEGIN INFECTION", cx, enterY);
+        UIUtils.drawPromptCentered(output, mainFont, enterTexture, "VIEW BRIEFING", cx, enterY);
         // ---------------------------------------------------------
         // 4. CONTROLS (Tucked into bottom corners)
         // ---------------------------------------------------------

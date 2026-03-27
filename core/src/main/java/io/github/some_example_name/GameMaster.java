@@ -10,6 +10,7 @@ import io.github.some_example_name.game.entity.CellFactory;
 import io.github.some_example_name.game.io.CellIOController;
 import io.github.some_example_name.game.io.GameAssetCatalog;
 import io.github.some_example_name.game.scene.GameScene;
+import io.github.some_example_name.game.scene.HowToPlayScene;
 import io.github.some_example_name.game.scene.LoseScene;
 import io.github.some_example_name.game.scene.PauseScene;
 import io.github.some_example_name.game.scene.StartScene;
@@ -41,6 +42,7 @@ public class GameMaster extends Game {
         sceneManager.setOnSceneActivated(() -> services.getInput().clearJustPressed());
 
         sceneManager.load("start", new StartScene(sceneManager, services, ioController));
+        sceneManager.load("howto", new HowToPlayScene(sceneManager, services, ioController));
         sceneManager.load("game", new GameScene(sceneManager, services, ioController));
         sceneManager.load("pause", new PauseScene(sceneManager, services, ioController));
         sceneManager.load("win", new WinScene(sceneManager, services, ioController));

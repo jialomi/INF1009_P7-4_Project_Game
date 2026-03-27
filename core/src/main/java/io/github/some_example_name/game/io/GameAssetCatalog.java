@@ -40,6 +40,7 @@ public final class GameAssetCatalog {
     };
 
     private static final String[] MUSIC = {
+            "audio/music/menu_bgm.mp3",
             "audio/music/lungs_bgm.mp3"
     };
 

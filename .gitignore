@@ -4,6 +4,7 @@
 
 # Build outputs (all modules)
 **/build/
+**/bin/
 
 # Java compiled artifacts
 *.class
