@@ -14,7 +14,6 @@ public class NpcBehaviour {
     }
 
     public static void chase(Entity npc, Entity target, float speed, float deltaTime, MovementManager movementManager) {
-        Vector2 from = movementManager.getEntityCenter(npc);
         Vector2 to = movementManager.getEntityCenter(target);
         moveTowardPoint(npc, to.x, to.y, speed, deltaTime, movementManager);
     }

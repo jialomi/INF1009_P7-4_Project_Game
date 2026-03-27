@@ -99,8 +99,6 @@ public class StartScene extends AbstractScene {
         mainFont.getData().setScale(1.0f);
         mainFont.setColor(Color.LIGHT_GRAY);
         
-        float iconSize = 40f;
-        
         SceneUiSupport.drawMovementAndActionLegend(output, mainFont,
                 wTexture, aTexture, sTexture, dTexture,
                 upTexture, leftTexture, downTexture, rightTexture,

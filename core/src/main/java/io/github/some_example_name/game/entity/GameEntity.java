@@ -1,14 +1,12 @@
 package io.github.some_example_name.game.entity;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 import io.github.some_example_name.engine.collision.CollisionShape;
 import io.github.some_example_name.engine.collision.PhysicalBody;
-import io.github.some_example_name.engine.entity.Renderable;
 import io.github.some_example_name.engine.entity.RenderableEntity;
 
-public abstract class GameEntity extends RenderableEntity implements Renderable, PhysicalBody {
+public abstract class GameEntity extends RenderableEntity implements PhysicalBody {
     private float hitboxInsetLeft;
     private float hitboxInsetRight;
     private float hitboxInsetBottom;

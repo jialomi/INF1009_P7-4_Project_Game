@@ -1,8 +1,6 @@
 package io.github.some_example_name.game.scene;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import com.badlogic.gdx.graphics.Color;
@@ -10,7 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
-import io.github.some_example_name.engine.collision.CollisionShape;
+import io.github.some_example_name.engine.collision.CollisionShape; 
 import io.github.some_example_name.engine.entity.Entity;
 import io.github.some_example_name.engine.io.EngineServices;
 import io.github.some_example_name.engine.io.OutputManager;
